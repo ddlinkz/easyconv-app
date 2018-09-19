@@ -1,0 +1,25 @@
+{
+  "name": "easyconv-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2",
+    "react-scripts": "1.1.5"
+  },
+  "homepage": "./",
+  "main": "src/electron-starter.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "electron": "electron . ",
+    "dev": "nf start"
+  },
+  "devDependencies": {
+    "electron": "^2.0.10",
+    "foreman": "^3.0.1",
+    "react-dropzone": "^5.1.0"
+  }
+}
