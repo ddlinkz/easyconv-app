@@ -13,13 +13,7 @@ import Dropzone from 'react-dropzone';
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">How's it going to React</h1>
-        </header>
-        <MusicList />
-      </div>
+      <MusicList />
     );
   }
 }
@@ -69,28 +63,43 @@ class MusicList extends Component {
     });
   }
 
-  /*handleClick(i) {
+  /*handleClick(i) { 
     const history = 
   }*/
 
-  render() {
+  // Dropzone will work if it knows the dimensions of the page
+  render() { 
+    const { accept, files, dropzoneActive } = this.state;
+    const overlayStyle = {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left:0,
+      background: 'rgba(0,0,0,0.5)',
+      textAlign: 'center',
+      color: '#fff'
+    };
     return(
       <Dropzone 
         disableClick
         style={{position: "relative"}}
-        accept={this.state.accept}
+        accept={accept}
         onDrop={this.onDrop.bind(this)}
         onDragEnter={this.onDragEnter.bind(this)}
         onDragLeave={this.onDragLeave.bind(this)}
       >
-        { this.state.dropzoneActive && <div class="overlayStyle">Drop files...</div> }
-        <p>Try dropping some files here, or click to select files to upload.</p>
-        <h2>Dropped files</h2>
-        <ul>
-          {
-            this.state.files.map(f => <MusicFile filepath={f.path} />)
-          }
-        </ul>
+        { dropzoneActive && <div style={overlayStyle}>Drop files...</div> }
+        <div className="App" >
+          <h1> my awesome app </h1>
+          <p>Drop files onto the app to prepare them for conversion.</p>
+          <h2>Dropped files</h2>
+          <ul>
+            {
+              files.map(f => <MusicFile filepath={f.path} />)
+            }
+          </ul>
+        </div>
       </Dropzone>
     );
   }
