@@ -3,6 +3,10 @@ import logo from './logo.svg';
 import './App.css';
 import Dropzone from 'react-dropzone';
 
+//https://react-dropzone.netlify.com/
+
+
+
 //TODO: 
 // Destination director
 // Actual conversion
@@ -18,15 +22,22 @@ class App extends Component {
   }
 }
 
-function MusicFile (props) {
+// Stateless functional component
+// onClick should define removing the component from the MusicList
+// MusicList would then handleClick and remove MusicFile from list.
+function MusicFile (props){
   return (
     <div className="musicfile">
-      <button onClick={props.onClick}>X</button>
+      <button onClick={props.removeItem}>X</button>
       {props.filepath}
     </div>
-  );
+  )
 }
 
+/* onDrop(files){
+  this.setState((state, files) =>
+  this.state = state.files - files));
+}*/
 class MusicList extends Component {
   constructor() {
     super()
@@ -35,6 +46,7 @@ class MusicList extends Component {
       files: [],
       dropzoneActive: false 
     }
+    this.removeItem = this.removeItem.bind(this);
   }
 
   onDragEnter() {
@@ -49,10 +61,13 @@ class MusicList extends Component {
     });
   }
 
-  //TODO: Remember files that have already been dropped
+  //TODO: How to filter files with the same path
   onDrop(files) {
+    const combo = this.state.files.concat(files);
+    const newFiles = combo.filter((v, i, a) => a.indexOf(v) === i);
+    console.log(newFiles);
     this.setState({
-      files,
+      files: newFiles,
       dropzoneActive: false
     });
   }
@@ -63,15 +78,17 @@ class MusicList extends Component {
     });
   }
 
-  /*handleClick(i) { 
-    const history = 
-  }*/
+  removeItem(item) { 
+    const newFiles = this.state.files.filter(el => el !== item)
+    this.setState({
+      files: newFiles
+    })
+  }
 
-  // Dropzone will work if it knows the dimensions of the page
   render() { 
     const { accept, files, dropzoneActive } = this.state;
     const overlayStyle = {
-      position: 'absolute',
+      position: 'absolute', 
       top: 0,
       right: 0,
       bottom: 0,
@@ -82,7 +99,7 @@ class MusicList extends Component {
     };
     return(
       <Dropzone 
-        disableClick
+        disableClick 
         style={{position: "relative"}}
         accept={accept}
         onDrop={this.onDrop.bind(this)}
@@ -96,7 +113,11 @@ class MusicList extends Component {
           <h2>Dropped files</h2>
           <ul>
             {
-              files.map(f => <MusicFile filepath={f.path} />)
+              files.map(file => <MusicFile 
+                                key={file.path}
+                                filepath={file.path}
+                                removeItem={() => this.removeItem(file)} 
+                              />)
             }
           </ul>
         </div>
