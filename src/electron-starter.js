@@ -15,6 +15,11 @@ ipcMain.on('asynchronous-message', (event, arg) => {
   event.sender.send('async-reply', 'pong');
 });
 
+ipcMain.on('file-list-test', (event, arg) => {
+  console.log(arg);
+  event.sender.send('file-list-reply', 'file-list received');
+})
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow

@@ -49,6 +49,7 @@ class MusicList extends Component {
       dropzoneActive: false 
     }
     this.removeItem = this.removeItem.bind(this);
+    this.serializeFiles = this.serializeFiles.bind(this);
   }
 
   componentDidMount() {
@@ -57,6 +58,16 @@ class MusicList extends Component {
       console.log(arg);
     });
     ipcRenderer.send('asynchronous-message', 'ping');
+  }
+
+  serializeFiles() {
+    const serialFiles = this.state.files.map((f) => f = f.path);
+    ipcRenderer.send('file-list-test', serialFiles);  
+    console.log('serial test');
+    console.log(serialFiles);
+    ipcRenderer.on('file-list-reply', (event, arg) => {
+      console.log(arg);
+    });
   }
 
   /*componentWillUnmount() {
@@ -137,7 +148,7 @@ class MusicList extends Component {
             }
           </ul>
           <div className="convert">
-            <button>Start Conversion</button>
+            <button onClick={this.serializeFiles}>Start Conversion</button>
           </div>
         </div>
       </Dropzone>
