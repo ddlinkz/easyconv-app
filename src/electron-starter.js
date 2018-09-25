@@ -4,8 +4,16 @@ const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 
+
 const path = require('path')
 const url = require('url')
+
+const {ipcMain} = require('electron')
+
+ipcMain.on('asynchronous-message', (event, arg) => {
+  console.log(arg);
+  event.sender.send('async-reply', 'pong');
+});
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.

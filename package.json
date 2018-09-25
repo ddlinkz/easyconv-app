@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "ffmpeg-static": "^2.3.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "foreman": "^3.0.1",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
     "react-scripts": "1.1.5"
@@ -10,16 +13,16 @@
   "homepage": "./",
   "main": "src/electron-starter.js",
   "scripts": {
-    "start": "react-scripts start",
+    "start": "nf start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "electron": "electron . ",
-    "dev": "nf start"
+    "electron-start": "node src/electron-wait-react",
+    "react-start": "BROWSER=none react-scripts start"
   },
   "devDependencies": {
     "electron": "^2.0.10",
-    "foreman": "^3.0.1",
     "react-dropzone": "^5.1.0"
   }
 }

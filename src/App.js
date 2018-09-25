@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+//import logo from './logo.svg';
 import './App.css';
 import Dropzone from 'react-dropzone';
 
+const electron = window.require('electron');
+//const fs = electron.remote.require('fs');
+const ipcRenderer = electron.ipcRenderer;
+
 //https://react-dropzone.netlify.com/
-
-
 
 //TODO: 
 // Destination director
@@ -14,7 +16,7 @@ import Dropzone from 'react-dropzone';
 //      along with music directory)
 // otherwise, regular directory history
 
-class App extends Component {
+class App extends Component {  
   render() {
     return (
       <MusicList />
@@ -49,6 +51,20 @@ class MusicList extends Component {
     this.removeItem = this.removeItem.bind(this);
   }
 
+  componentDidMount() {
+    console.log('MusicList has mounted.')
+    ipcRenderer.on('async-reply', (event, arg) => {
+      console.log(arg);
+    });
+    ipcRenderer.send('asynchronous-message', 'ping');
+  }
+
+  /*componentWillUnmount() {
+    console.log('check');
+  }*/
+
+  // When a file drags onto application
+  // Sets dropzoneActive to its corresponding action
   onDragEnter() {
     this.setState({
       dropzoneActive: true
@@ -120,6 +136,9 @@ class MusicList extends Component {
                               />)
             }
           </ul>
+          <div className="convert">
+            <button>Start Conversion</button>
+          </div>
         </div>
       </Dropzone>
     );
