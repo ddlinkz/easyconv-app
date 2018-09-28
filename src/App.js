@@ -53,7 +53,6 @@ class MusicList extends Component {
   }
 
   componentDidMount() {
-    console.log('MusicList has mounted.')
     ipcRenderer.on('async-reply', (event, arg) => {
       console.log(arg);
     });
@@ -65,9 +64,6 @@ class MusicList extends Component {
     ipcRenderer.send('file-list-test', serialFiles);  
     console.log('serial test');
     console.log(serialFiles);
-    ipcRenderer.on('file-list-reply', (event, arg) => {
-      console.log(arg);
-    });
   }
 
   /*componentWillUnmount() {
@@ -137,6 +133,9 @@ class MusicList extends Component {
         <div className="App" >
           <h1> my awesome app </h1>
           <p>Drop files onto the app to prepare them for conversion.</p>
+          <div className="convert">
+            <button onClick={this.serializeFiles}>Start Conversion</button>
+          </div>
           <h2>Dropped files</h2>
           <ul>
             {
@@ -147,9 +146,6 @@ class MusicList extends Component {
                               />)
             }
           </ul>
-          <div className="convert">
-            <button onClick={this.serializeFiles}>Start Conversion</button>
-          </div>
         </div>
       </Dropzone>
     );
