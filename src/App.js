@@ -1,15 +1,41 @@
 import React, { Component } from 'react';
 //import logo from './logo.svg';
 import './App.css';
-import Dropzone from 'react-dropzone';
-
-import ffmpeg from 'ffmpeg-static';
+import Dropzone from 'react-dropzone'; //https://react-dropzone.netlify.com/
+import ffmpegpath from 'ffmpeg-static';
 
 const electron = window.require('electron');
-//const fs = electron.remote.require('fs');
+const fs = electron.remote.require('fs');
 const ipcRenderer = electron.ipcRenderer;
 
-//https://react-dropzone.netlify.com/
+const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfmpegPath(ffmpegpath.path);
+
+const debug = false;
+
+if(debug) {
+  fs.access(ffmpegpath.path, fs.constants.F_OK, (err) => {
+    console.log(`${ffmpegpath.path} ${err ? 'does not exist' : 'exists'}`);
+  });
+  
+  ffmpeg.getAvailableCodecs(function(err, codecs) {
+    console.log('Available codecs:');
+    console.dir(codecs);
+  });
+}
+
+const command = new ffmpeg();
+
+// Sample command
+/*command.input('/Users/austinbrown/documents/samples/chippichippi.flac')
+  .audioCodec('libmp3lame')
+  .on('error', function(err) {
+    console.log('An error occurred: ' + err.message);
+  })
+  .on('end', function() {
+    console.log('Processing finished !');
+  })
+  .save('/Users/austinbrown/documents/samples/chippichippiSUCCESS.mp3');*/
 
 //TODO: 
 // Destination director
