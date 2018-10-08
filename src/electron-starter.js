@@ -1,14 +1,20 @@
 const electron = require('electron')
+const Store = require('electron-store')
+const path = require('path')
+const url = require('url')
+const {ipcMain} = require('electron')
+
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 
+const store = new Store();
 
-const path = require('path')
-const url = require('url')
-
-const {ipcMain} = require('electron')
+if(store.get('firsttime')){
+  store.set('firsttime', true)
+  store.set('directory', 'Add your directory here')
+}
 
 ipcMain.on('asynchronous-message', (event, arg) => {
   console.log(arg);

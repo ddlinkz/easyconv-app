@@ -12,6 +12,7 @@ const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegpath.path);
 
 const debug = false;
+const outputDir = '/Users/austinbrown/documents/samples/test';
 
 if(debug) {
   fs.access(ffmpegpath.path, fs.constants.F_OK, (err) => {
@@ -24,8 +25,6 @@ if(debug) {
   });
 }
 
-const command = new ffmpeg();
-
 // Sample command
 /*command.input('/Users/austinbrown/documents/samples/chippichippi.flac')
   .audioCodec('libmp3lame')
@@ -37,11 +36,12 @@ const command = new ffmpeg();
   })
   .save('/Users/austinbrown/documents/samples/chippichippiSUCCESS.mp3');*/
 
-//TODO: 
-// Destination director
-// Actual conversion
-// Option for Straight to Music Folder import (also saved in history
-//      along with music directory)
+//TODO:
+// Clear List
+// Sticky Dropped Files List
+// Persistance Data for User Settings
+// Destination directory
+// Option for Straight to Music Folder import
 // otherwise, regular directory history
 
 class App extends Component {  
@@ -50,6 +50,34 @@ class App extends Component {
       <MusicList />
     );
   }
+}
+
+class DirRadioSelect extends Component {
+  constructor() {
+    super()
+    this.state = {
+      value: 'default'
+    }
+
+    this.handleChange = this.handleChange.bind(this)
+  }
+
+  handleChange(event) {
+    this.setState({value: event.target.value})
+  }
+
+  render() {
+    //depending on state, return one of the options
+
+    return (
+      <div>
+        <form>
+          <input type="radio" value="default"/>Default
+          <input type="radio" value="music"/>Music
+        </form>
+      </div>
+    )
+  };
 }
 
 // Stateless functional component
@@ -88,12 +116,29 @@ class MusicList extends Component {
   }
 
   serializeFiles() {
-    const serialFiles = this.state.files.map((f) => f = f.path);
-    ipcRenderer.send('file-list-test', serialFiles);  
-    console.log('serial test');
-    console.log(serialFiles);
+    const serialFiles = this.state.files.map((f) => {
+      f = f.path
+      const newFile = f.split('.').slice(0, -1).join('.')
+      this.conversionProcess(f, newFile + '.mp3');
+    });
+    //ipcRenderer.send('file-list-test', serialFiles);  
+    //console.log(serialFiles);
   }
 
+  conversionProcess(file, output) {
+    const command = new ffmpeg();
+    const newFile = file.split('.').slice(0, -1).join('.')
+
+    command.input(file)
+    .audioCodec('libmp3lame')
+    .on('error', function(err) {
+      console.log('An error occurred: ' + err.message);
+    })
+    .on('end', function() {
+      console.log('Processing finished !');
+    })
+    .save(output);
+  }
   /*componentWillUnmount() {
     console.log('check');
   }*/
@@ -112,11 +157,21 @@ class MusicList extends Component {
     });
   }
 
-  //TODO: How to filter files with the same path
   onDrop(files) {
-    const combo = this.state.files.concat(files);
+    // Contributed by Jacob Katzeff
+    const currPaths = this.state.files.map((file) => file.path);
+    let f = files.slice()
+    let arr=[];
+    for(let i=0;i<f.length;i++){
+      let file = f[i];
+      if(currPaths.indexOf(file.path) >= 0){
+        continue;
+      } else {
+        arr = arr.concat(file);
+      }
+    }
+    const combo = this.state.files.concat(arr);
     const newFiles = combo.filter((v, i, a) => a.indexOf(v) === i);
-    console.log(newFiles);
     this.setState({
       files: newFiles,
       dropzoneActive: false
@@ -148,6 +203,11 @@ class MusicList extends Component {
       textAlign: 'center',
       color: '#fff'
     };
+    const divStyle = {
+      position: 'relative',
+      textAlign: 'left',
+      left: '10px',
+    };
     return(
       <Dropzone 
         disableClick 
@@ -158,18 +218,21 @@ class MusicList extends Component {
         onDragLeave={this.onDragLeave.bind(this)}
       >
         { dropzoneActive && <div style={overlayStyle}>Drop files...</div> }
-        <div className="App" >
-          <h1> my awesome app </h1>
+        <div className="App" style={divStyle} >
+          <h1><i>EasyConv</i></h1>
           <p>Drop files onto the app to prepare them for conversion.</p>
+          <h2>Directory Selection</h2>
+          <input type="file" webkitdirectory="true" />
+          <DirRadioSelect />
           <div className="convert">
             <button onClick={this.serializeFiles}>Start Conversion</button>
           </div>
           <h2>Dropped files</h2>
           <ul>
             {
-              files.map(file => <MusicFile 
-                                key={file.path}
-                                filepath={file.path}
+              files.map((file,i) => <MusicFile 
+                                key={file.path+i}
+                                filepath={file.path.split("/").pop()}
                                 removeItem={() => this.removeItem(file)} 
                               />)
             }
@@ -181,3 +244,24 @@ class MusicList extends Component {
 }
 
 export default App;
+
+/*
+Two different choices
+
+Music: Take in Artist, Album, Music Directory
+Converts straight to music library.
+
+Regular folder:
+Converts straight to folder
+
+Folder can be passed down from app communication from memory as prop
+
+DirRadioSelect
+state: setState based on selected value
+
+if Music: call MusicDir, pass props of stored music directory
+and handleChange
+MusicDir:
+<form></form>
+
+*/
