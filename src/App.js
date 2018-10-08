@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-//import logo from './logo.svg';
 import './App.css';
 import Dropzone from 'react-dropzone'; //https://react-dropzone.netlify.com/
 import ffmpegpath from 'ffmpeg-static';
@@ -25,7 +24,7 @@ if(debug) {
   });
 }
 
-// Sample command
+// SAMPLE COMMAND
 /*command.input('/Users/austinbrown/documents/samples/chippichippi.flac')
   .audioCodec('libmp3lame')
   .on('error', function(err) {
@@ -36,13 +35,16 @@ if(debug) {
   })
   .save('/Users/austinbrown/documents/samples/chippichippiSUCCESS.mp3');*/
 
-//TODO:
-// Clear List
+// TODO: //
+//////////////////////////////
+//
 // Sticky Dropped Files List
 // Persistance Data for User Settings
 // Destination directory
 // Option for Straight to Music Folder import
 // otherwise, regular directory history
+//
+//////////////////////////////
 
 class App extends Component {  
   render() {
@@ -52,6 +54,8 @@ class App extends Component {
   }
 }
 
+// Chooses which user preferences are shown for Regular Conversion
+// and S2L (straight to library) Conversion
 class DirRadioSelect extends Component {
   constructor() {
     super()
@@ -81,6 +85,16 @@ class DirRadioSelect extends Component {
 }
 
 // Stateless functional component
+// onClick causes MusicList to clear it's state of files
+function ClearList (props){
+  return (
+    <div className="clearlist">
+      <button onClick={props.clearList}>Clear List</button>
+    </div>
+  )
+}
+
+// Stateless functional component
 // onClick should define removing the component from the MusicList
 // MusicList would then handleClick and remove MusicFile from list.
 function MusicFile (props){
@@ -106,23 +120,15 @@ class MusicList extends Component {
     }
     this.removeItem = this.removeItem.bind(this);
     this.serializeFiles = this.serializeFiles.bind(this);
+    this.clearList = this.clearList.bind(this);
   }
 
+  // O
   componentDidMount() {
     ipcRenderer.on('async-reply', (event, arg) => {
       console.log(arg);
     });
     ipcRenderer.send('asynchronous-message', 'ping');
-  }
-
-  serializeFiles() {
-    const serialFiles = this.state.files.map((f) => {
-      f = f.path
-      const newFile = f.split('.').slice(0, -1).join('.')
-      this.conversionProcess(f, newFile + '.mp3');
-    });
-    //ipcRenderer.send('file-list-test', serialFiles);  
-    //console.log(serialFiles);
   }
 
   conversionProcess(file, output) {
@@ -143,20 +149,22 @@ class MusicList extends Component {
     console.log('check');
   }*/
 
-  // When a file drags onto application
-  // Sets dropzoneActive to its corresponding action
+  // File drag enter React function
   onDragEnter() {
     this.setState({
       dropzoneActive: true
     });
   }
 
+  // File drag leave React Function
   onDragLeave() {
     this.setState({
       dropzoneActive: false
     });
   }
 
+  // On file drop onto window
+  // Modified to remove duplicates
   onDrop(files) {
     // Contributed by Jacob Katzeff
     const currPaths = this.state.files.map((file) => file.path);
@@ -178,17 +186,38 @@ class MusicList extends Component {
     });
   }
 
+  // Defines what are acceptable Mime file types
   applyMimeTypes(event) {
     this.setState({
       accept: event.target.value
     });
   }
 
+  // Remove an item from the list
   removeItem(item) { 
     const newFiles = this.state.files.filter(el => el !== item)
     this.setState({
       files: newFiles
     })
+  }
+
+  // Sets state of files to an empty array
+  clearList() {
+    this.setState({
+      files: []
+    })
+  }
+
+  // Takes list of files, takes filetype string, replaces with .mp3
+  // TODO: Make applible to any filetype
+  serializeFiles() {
+    const serialFiles = this.state.files.map((f) => {
+      f = f.path
+      const newFile = f.split('.').slice(0, -1).join('.')
+      this.conversionProcess(f, newFile + '.mp3');
+    });
+    //ipcRenderer.send('file-list-test', serialFiles);  
+    //console.log(serialFiles);
   }
 
   render() { 
@@ -227,6 +256,7 @@ class MusicList extends Component {
           <div className="convert">
             <button onClick={this.serializeFiles}>Start Conversion</button>
           </div>
+          <ClearList clearList={() => this.clearList()}/>
           <h2>Dropped files</h2>
           <ul>
             {
