@@ -38,7 +38,6 @@ if(debug) {
 // TODO: //
 //////////////////////////////
 //
-// Sticky Dropped Files List
 // Persistance Data for User Settings
 // Destination directory
 // Option for Straight to Music Folder import
@@ -54,34 +53,85 @@ class App extends Component {
   }
 }
 
+// Stateless functional component
+// Takes in an array of choice options to appear
+function RadioOption ({options, selected, onChange}){
+  return (
+    <div className="radiooption">
+      {options.map((choice, index) => (
+        <label key={index}>
+          <input type="radio"
+            name="vote"
+            value={choice.value}
+            key={index}
+            checked={selected === choice.value}
+            onChange={onChange} />
+          {choice.text}
+        </label>
+      ))}
+    </div>
+  )
+}
+
+
 // Chooses which user preferences are shown for Regular Conversion
 // and S2L (straight to library) Conversion
-class DirRadioSelect extends Component {
-  constructor() {
-    super()
+// TODO: View is changed dependent on 
+// TODO: Data persistence
+// TODO: Directory return
+class RadioSelect extends Component {
+  constructor(props) {
+    super(props)
     this.state = {
-      value: 'default'
+      selectedOption: ''
     }
-
+    this.handleClick = this.handleClick.bind(this)
     this.handleChange = this.handleChange.bind(this)
   }
 
+  handleClick() {
+    console.log('submitted value', this.state.selected)
+  }
+
   handleChange(event) {
-    this.setState({value: event.target.value})
+    console.log('selected option', event.target.value)
+    this.setState({selectedOption: event.target.value})
   }
 
   render() {
     //depending on state, return one of the options
+    //the select will handle the render themselves
+
+    /*const formsubmission;
+    if(this.state.value == 'music'){
+      formsubmission = 'music';
+    } else {
+      formsubmission = 'default';
+    }*/
+
+   let choices = [{ text: 'Default', value: '1' },
+                     { text: 'Music', value: '2' }
+    ];
 
     return (
-      <div>
-        <form>
-          <input type="radio" value="default"/>Default
-          <input type="radio" value="music"/>Music
-        </form>
+      <div className="radioselect">
+        <RadioOption
+          options={choices}
+          onChange={(e) => this.handleChange(e)}
+          selected={this.state.selectedOption} />
       </div>
     )
   };
+}
+
+// Stateless functional component
+// onClick begins process of conversion of files in list
+function StartButton (props){
+  return (
+    <div className="convert">
+      <button onClick={props.serializeFiles}>Start Conversion</button>
+    </div>
+  )
 }
 
 // Stateless functional component
@@ -209,13 +259,14 @@ class MusicList extends Component {
   }
 
   // Takes list of files, takes filetype string, replaces with .mp3
-  // TODO: Make applible to any filetype
+  // TODO: Make applible to any filetype??
   serializeFiles() {
     const serialFiles = this.state.files.map((f) => {
       f = f.path
       const newFile = f.split('.').slice(0, -1).join('.')
-      this.conversionProcess(f, newFile + '.mp3');
+      //this.conversionProcess(f, newFile + '.mp3');
     });
+    console.log(this.state.files);
     //ipcRenderer.send('file-list-test', serialFiles);  
     //console.log(serialFiles);
   }
@@ -252,21 +303,21 @@ class MusicList extends Component {
           <p>Drop files onto the app to prepare them for conversion.</p>
           <h2>Directory Selection</h2>
           <input type="file" webkitdirectory="true" />
-          <DirRadioSelect />
-          <div className="convert">
-            <button onClick={this.serializeFiles}>Start Conversion</button>
-          </div>
+          <RadioSelect />
+          <StartButton serializeFiles={() => this.serializeFiles()} />
           <ClearList clearList={() => this.clearList()}/>
           <h2>Dropped files</h2>
-          <ul>
-            {
-              files.map((file,i) => <MusicFile 
-                                key={file.path+i}
-                                filepath={file.path.split("/").pop()}
-                                removeItem={() => this.removeItem(file)} 
-                              />)
-            }
-          </ul>
+          <div className="scroll">
+            <ul>
+              {
+                files.map((file,i) => <MusicFile 
+                                  key={file.path+i}
+                                  filepath={file.path.split("/").pop()}
+                                  removeItem={() => this.removeItem(file)} 
+                                />)
+              }
+            </ul>
+          </div>
         </div>
       </Dropzone>
     );

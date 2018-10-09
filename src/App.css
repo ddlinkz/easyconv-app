@@ -35,6 +35,13 @@
   color: '#fff';
 }
 
+.scroll {
+  height: 250px;
+  width: 100%;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
