@@ -21,6 +21,18 @@ ipcMain.on('asynchronous-message', (event, arg) => {
   event.sender.send('async-reply', 'pong');
 });
 
+// Responds with stored selection
+ipcMain.on('asynchronous-select', (event, arg) => {
+  console.log(arg);
+  event.sender.send('async-select', store.get('radioselect'));
+});
+
+ipcMain.on('asynchronous-select-save', (event, arg) => {
+  console.log('Select saved!');
+  store.set('radioselect', arg);
+  event.sender.send('async-select', arg);
+});
+
 ipcMain.on('file-list-test', (event, arg) => {
   console.log(arg);
   event.sender.send('file-list-reply', 'file-list received');

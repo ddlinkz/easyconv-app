@@ -83,18 +83,32 @@ class RadioSelect extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      selectedOption: ''
+      selectedOption: '',
     }
     this.handleClick = this.handleClick.bind(this)
     this.handleChange = this.handleChange.bind(this)
+  }
+
+  // On mount, set selectedOption to previously used
+  componentDidMount() {
+    ipcRenderer.on('async-select', (event, arg) => {
+      this.setState({
+        selectedOption: arg
+      })
+    });
+    ipcRenderer.send('asynchronous-select', 'radio mount msg sent');
   }
 
   handleClick() {
     console.log('submitted value', this.state.selected)
   }
 
+  // When the select is changed, save and store option
   handleChange(event) {
-    console.log('selected option', event.target.value)
+    ipcRenderer.on('async-select-save', (event, arg) => {
+      console.log(arg + ' stored')
+    })
+    ipcRenderer.send('asynchronous-select-save', event.target.value);
     this.setState({selectedOption: event.target.value})
   }
 
@@ -109,7 +123,7 @@ class RadioSelect extends Component {
       formsubmission = 'default';
     }*/
 
-   let choices = [{ text: 'Default', value: '1' },
+    let choices = [{ text: 'Default', value: '1' },
                      { text: 'Music', value: '2' }
     ];
 
@@ -119,6 +133,7 @@ class RadioSelect extends Component {
           options={choices}
           onChange={(e) => this.handleChange(e)}
           selected={this.state.selectedOption} />
+          {this.state.selectedforms}
       </div>
     )
   };
@@ -156,10 +171,8 @@ function MusicFile (props){
   )
 }
 
-/* onDrop(files){
-  this.setState((state, files) =>
-  this.state = state.files - files));
-}*/
+// Main Music component
+// Contains dropzone and handles conversion
 class MusicList extends Component {
   constructor() {
     super()
@@ -173,12 +186,11 @@ class MusicList extends Component {
     this.clearList = this.clearList.bind(this);
   }
 
-  // O
   componentDidMount() {
-    ipcRenderer.on('async-reply', (event, arg) => {
+    /*ipcRenderer.on('async-reply', (event, arg) => {
       console.log(arg);
     });
-    ipcRenderer.send('asynchronous-message', 'ping');
+    ipcRenderer.send('asynchronous-message', 'ping');*/
   }
 
   conversionProcess(file, output) {
