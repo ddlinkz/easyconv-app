@@ -73,6 +73,95 @@ function RadioOption ({options, selected, onChange}){
   )
 }
 
+// Forms to show when Music is selected
+class SelectMusic extends Component {
+  constructor() {
+    super()
+    this.state = {
+      artist: '',
+      album: ''
+    }
+
+    this.handleChange = this.handleChange.bind(this)
+  }
+
+  handleChange(event) {
+    if(event.target.name == 'artistform'){
+      this.setState({artist: event.target.value})
+    } else if(event.target.name == 'albumform') {
+      this.setState({album: event.target.value})
+    }
+  }
+
+  render () {
+    return(
+      <div className="selectmusic">
+        <h3>Choose your music directory</h3>
+        <p>This option will render your
+           files and place them into your music library</p>
+        <input
+          name="directoryselect" 
+          type="file" 
+          webkitdirectory="true" 
+          onChange={(e) => this.handleChange(e)} />
+        <br/>
+        <br/>
+        <form>
+          <label>
+            Artist:
+            <input 
+              name="artistform"
+              type="text" 
+              value={this.state.artist} 
+              onChange={this.handleChange} />
+            Album:
+            <input
+              name="albumform"
+              type="text" 
+              value={this.state.album} 
+              onChange={this.handleChange} />
+          </label>
+        </form>
+      </div>
+    )
+  };
+}
+
+// Forms to show when Default is selected
+class SelectDefault extends Component {
+  constructor() {
+    super()
+    this.state = {
+
+    }
+  }
+
+  render () {
+    return(
+      <div className="selectdefault">
+        <h3>Default</h3>
+        <p>This option will render your files and place them
+            in a directory of your choice</p>
+        <input
+          name="directoryselect" 
+          type="file" 
+          webkitdirectory="true" 
+          onChange={(e) => this.handleChange(e)} />
+      </div>
+    )
+  };
+}
+
+// Functional Component
+// Returns the proper component based on RadioSelect
+function SelectForm(props) {
+  const selection = props.selection
+  if(selection == '1'){
+    return <SelectDefault />
+  } else {
+    return <SelectMusic />
+  } 
+}
 
 // Chooses which user preferences are shown for Regular Conversion
 // and S2L (straight to library) Conversion
@@ -96,6 +185,9 @@ class RadioSelect extends Component {
         selectedOption: arg
       })
     });
+    ipcRenderer.on('async-select-save', (event, arg) => {
+      console.log(arg + ' stored')
+    })
     ipcRenderer.send('asynchronous-select', 'radio mount msg sent');
   }
 
@@ -105,11 +197,16 @@ class RadioSelect extends Component {
 
   // When the select is changed, save and store option
   handleChange(event) {
-    ipcRenderer.on('async-select-save', (event, arg) => {
-      console.log(arg + ' stored')
-    })
     ipcRenderer.send('asynchronous-select-save', event.target.value);
     this.setState({selectedOption: event.target.value})
+  }
+
+  selectForm() {
+    if(this.state.selectedOption == '1'){
+      return <SelectDefault />
+    } else {
+      return <SelectMusic />
+    } 
   }
 
   render() {
@@ -125,15 +222,17 @@ class RadioSelect extends Component {
 
     let choices = [{ text: 'Default', value: '1' },
                      { text: 'Music', value: '2' }
-    ];
+    ]
 
     return (
       <div className="radioselect">
         <RadioOption
+          name="formselect"
           options={choices}
           onChange={(e) => this.handleChange(e)}
           selected={this.state.selectedOption} />
-          {this.state.selectedforms}
+        <SelectForm selection={this.state.selectedOption} />
+        <br/>
       </div>
     )
   };
@@ -314,7 +413,6 @@ class MusicList extends Component {
           <h1><i>EasyConv</i></h1>
           <p>Drop files onto the app to prepare them for conversion.</p>
           <h2>Directory Selection</h2>
-          <input type="file" webkitdirectory="true" />
           <RadioSelect />
           <StartButton serializeFiles={() => this.serializeFiles()} />
           <ClearList clearList={() => this.clearList()}/>
