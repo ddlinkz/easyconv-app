@@ -16,27 +16,46 @@ if(store.get('firsttime')){
   store.set('directory', 'Add your directory here')
 }
 
-ipcMain.on('asynchronous-message', (event, arg) => {
+/*ipcMain.on('asynchronous-message', (event, arg) => {
   console.log(arg);
   event.sender.send('async-reply', 'pong');
-});
+});*/
 
-// Responds with stored selection
-ipcMain.on('asynchronous-select', (event, arg) => {
-  console.log(arg);
-  event.sender.send('async-select', store.get('radioselect'));
-});
-
-ipcMain.on('asynchronous-select-save', (event, arg) => {
-  console.log('Select saved!');
-  store.set('radioselect', arg);
-  event.sender.send('async-select', arg);
-});
-
-ipcMain.on('file-list-test', (event, arg) => {
-  console.log(arg);
-  event.sender.send('file-list-reply', 'file-list received');
+// Select Form Launch and Save
+// On launch, respond with stored select
+ipcMain.on('radio-select-launch', (event, arg) => {
+  console.log('Radio Select launched')
+  event.sender.send('radio-select-launch-resp', store.get('radioselect'))
 })
+
+// On save, store the selection
+ipcMain.on('radio-select-save', (event, arg) => {
+  console.log('Select saved!')
+  store.set('radioselect', arg)
+})
+
+// Music Dir Launch and Save
+ipcMain.on('music-dir-launch', (event, arg) => {
+  console.log('Music Select launched')
+  event.sender.send('music-dir-launch-resp', store.get('musicdirselect'))
+})
+
+ipcMain.on('music-dir-save', (event, arg) => {
+  console.log('Music Select saved')
+  store.set('musicdirselect', arg)
+})
+
+// Select Dir Launch and Save
+ipcMain.on('default-dir-launch', (event, arg) => {
+  console.log('Default Select launched!')
+  event.sender.send('default-dir-launch-resp', store.get('defaultdirselect'))
+})
+
+ipcMain.on('default-dir-save', (event, arg) => {
+  console.log('Defualt Select saved')
+  store.set('defaultdirselect', arg)
+})
+
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.

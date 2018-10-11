@@ -38,10 +38,7 @@ if(debug) {
 // TODO: //
 //////////////////////////////
 //
-// Persistance Data for User Settings
-// Destination directory
-// Option for Straight to Music Folder import
-// otherwise, regular directory history
+// Actual Conversion
 //
 //////////////////////////////
 
@@ -53,7 +50,167 @@ class App extends Component {
   }
 }
 
-// Stateless functional component
+// Forms to show when Music is selected
+class SelectMusic extends Component {
+  constructor() {
+    super()
+    this.state = {
+      artist: '',
+      album: '',
+      dir: ''
+    }
+
+    this.musicDirInput = React.createRef();
+    this.handleChange = this.handleChange.bind(this)
+  }
+
+  // Setting state using data from async request
+  componentDidMount() {
+    ipcRenderer.once('music-dir-launch-resp', (event, arg) => {
+      this.setState({
+        dir: arg
+      })
+    });
+    ipcRenderer.send('music-dir-launch', 'music dir msg sent');
+  }
+
+  handleChange(event) {
+    let name = event.target.name
+    let value = event.target.value
+
+    if(name === 'dir-file-input'){
+      value = this.musicDirInput.current.files[0].path
+      ipcRenderer.send('music-dir-save', value)
+      name = 'dir'
+    } else if(name === 'dir'){
+      ipcRenderer.send('music-dir-save', value)
+    }
+
+    this.setState({
+        [name]: value
+    })
+  }
+
+  render () {
+    return(
+      <div className="selectmusic">
+        <h3>Choose your music directory</h3>
+        <p>This option will render your
+           files and place them into your music library</p>
+        <input
+          name="dir-file-input" 
+          type="file" 
+          ref={this.musicDirInput}
+          webkitdirectory="true" 
+          onChange={this.handleChange} />
+        <br/>
+        <br/>
+        <form>
+          <label>
+            Directory:
+            <input
+              name="dir"
+              type="text"
+              value={this.state.dir}
+              onChange={this.handleChange} />
+            <br/>
+            Artist:
+            <input 
+              name="artist"
+              type="text" 
+              value={this.state.artist} 
+              onChange={this.handleChange} />
+            Album:
+            <input
+              name="album"
+              type="text" 
+              value={this.state.album} 
+              onChange={this.handleChange} />
+          </label>
+        </form>
+      </div>
+    )
+  };
+}
+
+// Forms to show when Default is selected
+class SelectDefault extends Component {
+  constructor() {
+    super()
+    this.state = {
+      dir: ''
+    }
+    
+    this.defaultDirInput = React.createRef();
+    this.handleChange = this.handleChange.bind(this)
+  }
+
+  // Setting state using data from async request
+  componentDidMount(){
+    ipcRenderer.once('default-dir-launch-resp', (event, arg) => {
+      this.setState({
+        dir: arg
+      })
+    })
+    ipcRenderer.send('default-dir-launch', 'default dir msg sent')
+  }
+
+  handleChange(event) {
+    let name = event.target.name
+    let value = event.target.value
+
+    // Handling for two seperate input forms
+    if(name === 'dir-file-input'){
+      value = this.defaultDirInput.current.files[0].path
+      ipcRenderer.send('default-dir-save', value)
+      name = 'dir'
+    } else if(name === 'dir'){
+      ipcRenderer.send('default-dir-save', value)
+    }
+    this.setState({
+      [name]: value
+    })
+  }
+
+  render () {
+    return(
+      <div className="selectdefault">
+        <h3>Default</h3>
+        <p>This option will render your files and place them
+            in a directory of your choice</p>
+        <input
+          name="dir-file-input" 
+          type="file" 
+          ref={this.defaultDirInput}
+          webkitdirectory="true" 
+          onChange={this.handleChange} />
+        <br/>
+        <form>
+          <label>
+          Directory:
+            <input
+              name="dir"
+              type="text"
+              value={this.state.dir}
+              onChange={this.handleChange} />
+            <br/>
+          </label>
+        </form>
+      </div>
+    )
+  };
+}
+
+// Returns the proper component based on RadioSelect
+function SelectForm(props) {
+  const selection = props.selection
+  if(selection === '1'){
+    return <SelectDefault />
+  } else {
+    return <SelectMusic />
+  } 
+}
+
 // Takes in an array of choice options to appear
 function RadioOption ({options, selected, onChange}){
   return (
@@ -73,101 +230,10 @@ function RadioOption ({options, selected, onChange}){
   )
 }
 
-// Forms to show when Music is selected
-class SelectMusic extends Component {
-  constructor() {
-    super()
-    this.state = {
-      artist: '',
-      album: ''
-    }
-
-    this.handleChange = this.handleChange.bind(this)
-  }
-
-  handleChange(event) {
-    if(event.target.name == 'artistform'){
-      this.setState({artist: event.target.value})
-    } else if(event.target.name == 'albumform') {
-      this.setState({album: event.target.value})
-    }
-  }
-
-  render () {
-    return(
-      <div className="selectmusic">
-        <h3>Choose your music directory</h3>
-        <p>This option will render your
-           files and place them into your music library</p>
-        <input
-          name="directoryselect" 
-          type="file" 
-          webkitdirectory="true" 
-          onChange={(e) => this.handleChange(e)} />
-        <br/>
-        <br/>
-        <form>
-          <label>
-            Artist:
-            <input 
-              name="artistform"
-              type="text" 
-              value={this.state.artist} 
-              onChange={this.handleChange} />
-            Album:
-            <input
-              name="albumform"
-              type="text" 
-              value={this.state.album} 
-              onChange={this.handleChange} />
-          </label>
-        </form>
-      </div>
-    )
-  };
-}
-
-// Forms to show when Default is selected
-class SelectDefault extends Component {
-  constructor() {
-    super()
-    this.state = {
-
-    }
-  }
-
-  render () {
-    return(
-      <div className="selectdefault">
-        <h3>Default</h3>
-        <p>This option will render your files and place them
-            in a directory of your choice</p>
-        <input
-          name="directoryselect" 
-          type="file" 
-          webkitdirectory="true" 
-          onChange={(e) => this.handleChange(e)} />
-      </div>
-    )
-  };
-}
-
-// Functional Component
-// Returns the proper component based on RadioSelect
-function SelectForm(props) {
-  const selection = props.selection
-  if(selection == '1'){
-    return <SelectDefault />
-  } else {
-    return <SelectMusic />
-  } 
-}
-
 // Chooses which user preferences are shown for Regular Conversion
 // and S2L (straight to library) Conversion
-// TODO: View is changed dependent on 
-// TODO: Data persistence
-// TODO: Directory return
+// Music - S2L
+// Default - Regular
 class RadioSelect extends Component {
   constructor(props) {
     super(props)
@@ -180,46 +246,21 @@ class RadioSelect extends Component {
 
   // On mount, set selectedOption to previously used
   componentDidMount() {
-    ipcRenderer.on('async-select', (event, arg) => {
+    ipcRenderer.once('radio-select-launch-resp', (event, arg) => {
       this.setState({
         selectedOption: arg
       })
     });
-    ipcRenderer.on('async-select-save', (event, arg) => {
-      console.log(arg + ' stored')
-    })
-    ipcRenderer.send('asynchronous-select', 'radio mount msg sent');
-  }
-
-  handleClick() {
-    console.log('submitted value', this.state.selected)
+    ipcRenderer.send('radio-select-launch', 'radio mount msg sent');
   }
 
   // When the select is changed, save and store option
   handleChange(event) {
-    ipcRenderer.send('asynchronous-select-save', event.target.value);
+    ipcRenderer.send('radio-select-save', event.target.value);
     this.setState({selectedOption: event.target.value})
   }
 
-  selectForm() {
-    if(this.state.selectedOption == '1'){
-      return <SelectDefault />
-    } else {
-      return <SelectMusic />
-    } 
-  }
-
   render() {
-    //depending on state, return one of the options
-    //the select will handle the render themselves
-
-    /*const formsubmission;
-    if(this.state.value == 'music'){
-      formsubmission = 'music';
-    } else {
-      formsubmission = 'default';
-    }*/
-
     let choices = [{ text: 'Default', value: '1' },
                      { text: 'Music', value: '2' }
     ]
@@ -238,7 +279,6 @@ class RadioSelect extends Component {
   };
 }
 
-// Stateless functional component
 // onClick begins process of conversion of files in list
 function StartButton (props){
   return (
@@ -248,7 +288,6 @@ function StartButton (props){
   )
 }
 
-// Stateless functional component
 // onClick causes MusicList to clear it's state of files
 function ClearList (props){
   return (
@@ -258,7 +297,6 @@ function ClearList (props){
   )
 }
 
-// Stateless functional component
 // onClick should define removing the component from the MusicList
 // MusicList would then handleClick and remove MusicFile from list.
 function MusicFile (props){
@@ -271,7 +309,7 @@ function MusicFile (props){
 }
 
 // Main Music component
-// Contains dropzone and handles conversion
+// Contains dropzone for files
 class MusicList extends Component {
   constructor() {
     super()
@@ -435,24 +473,3 @@ class MusicList extends Component {
 }
 
 export default App;
-
-/*
-Two different choices
-
-Music: Take in Artist, Album, Music Directory
-Converts straight to music library.
-
-Regular folder:
-Converts straight to folder
-
-Folder can be passed down from app communication from memory as prop
-
-DirRadioSelect
-state: setState based on selected value
-
-if Music: call MusicDir, pass props of stored music directory
-and handleChange
-MusicDir:
-<form></form>
-
-*/
