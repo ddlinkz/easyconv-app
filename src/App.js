@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import Dropzone from 'react-dropzone'; //https://react-dropzone.netlify.com/
 import ffmpegpath from 'ffmpeg-static';
+import ffprobepath from 'ffprobe-static';
 
 const electron = window.require('electron');
 const fs = electron.remote.require('fs');
@@ -9,13 +10,17 @@ const ipcRenderer = electron.ipcRenderer;
 
 const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegpath.path);
+ffmpeg.setFfprobePath(ffprobepath.path);
 
-const debug = false;
-const outputDir = '/Users/austinbrown/documents/samples/test';
+const debug = true;
 
 if(debug) {
   fs.access(ffmpegpath.path, fs.constants.F_OK, (err) => {
     console.log(`${ffmpegpath.path} ${err ? 'does not exist' : 'exists'}`);
+  });
+
+  fs.access(ffprobepath.path, fs.constants.F_OK, (err) => {
+    console.log(`${ffprobepath.path} ${err ? 'does not exist' : 'exists'}`);
   });
   
   ffmpeg.getAvailableCodecs(function(err, codecs) {
@@ -39,6 +44,7 @@ if(debug) {
 //////////////////////////////
 //
 // Progress bars?
+// Requires ffprobe
 //
 //////////////////////////////
 
@@ -55,8 +61,8 @@ class SelectMusic extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      artist: '',
-      album: '',
+      artist: '222',
+      album: 'TEST',
       dir: '',
       files: props.files
     }
@@ -136,12 +142,15 @@ class SelectMusic extends Component {
         .on('error', function(err) {
           console.log('An error occurred: ' + err.message);
         })
+        .on('progress', function(progress) {
+          console.log('Processing: ' + progress.percent + '% done');
+        })
         .on('end', function() {
           console.log('Processing finished !');
         })
-        .save(
-          output + '/' + oldFiles[i].split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
-          )
+        .save(output + '/' + oldFiles[i].split("/").pop().split('.')
+                                        .slice(0, -1).join('.')
+                                        .concat('.mp3'))
     }
   }
 
@@ -244,9 +253,11 @@ class SelectDefault extends Component {
   }
 
   conversion(oldFiles, output){
-    console.log('Starting conversion!')
+    console.log('Starting conversion !')
     const command = new ffmpeg();
 
+    //let times = []
+    //times[0] = performance.now()
     for(let i = 0; i<oldFiles.length; i++){
       const command = new ffmpeg();
       command.input(oldFiles[i])
@@ -257,7 +268,9 @@ class SelectDefault extends Component {
           console.log('An error occurred: ' + err.message);
         })
         .on('end', function() {
+          //times[i+1] = performance.now()
           console.log('Processing finished !');
+          //console.log('This took ' + (times[i+1] - times[0]) + ' milliseconds')
         })
         .save(
           output + '/' + oldFiles[i].split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
@@ -384,15 +397,6 @@ class RadioSelect extends Component {
   };
 }
 
-// onClick begins process of conversion of files in list
-function StartButton (props){
-  return (
-    <div className="convert">
-      <button onClick={props.conversion}>Start Conversion</button>
-    </div>
-  )
-}
-
 // onClick causes MusicList to clear it's state of files
 function ClearList (props){
   return (
@@ -465,6 +469,7 @@ class MusicList extends Component {
     });
   }
 
+  // TODO: filetype management
   // Defines what are acceptable Mime file types
   applyMimeTypes(event) {
     this.setState({
@@ -487,6 +492,7 @@ class MusicList extends Component {
     })
   }
 
+  // TODO: Can probably get rid of this
   // Takes list of files, takes filetype string, replaces with .mp3
   // TODO: Make applible to any filetype??
   serializeFiles() {
