@@ -38,7 +38,6 @@ if(debug) {
 // TODO: //
 //////////////////////////////
 //
-// If folders DNE, create them
 // Progress bars?
 //
 //////////////////////////////
@@ -106,9 +105,28 @@ class SelectMusic extends Component {
     this.conversion(files,dir+'/'+artist+'/'+album)
   }
 
+  createFolders(artistDir, albumDir) {
+    // if Artist directory DNE, make it
+    if(!fs.existsSync(artistDir)){
+      fs.mkdir(artistDir, err => {
+        if (err && err.code != 'EEXIST') throw 'up'
+      })
+    }
+    // if Album directory DNE, make it
+    if(!fs.existsSync(albumDir)){
+      fs.mkdir(albumDir, err => {
+        if (err && err.code != 'EEXIST') throw 'up'
+      })
+    }
+  }
+
   conversion(oldFiles, output){
     console.log('Starting conversion!')
     const command = new ffmpeg();
+    const artistDir = this.state.dir+'/'+this.state.artist
+    const albumDir = artistDir + '/' + this.state.album
+
+    this.createFolders(artistDir, albumDir)
 
     oldFiles.map((file) =>
       command.input(file)
@@ -120,8 +138,7 @@ class SelectMusic extends Component {
         console.log('Processing finished !');
       })
       .save(
-        output + '/' + file.split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
-        )
+        output + '/' + file.split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3'))
     )
   }
 
