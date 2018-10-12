@@ -122,24 +122,27 @@ class SelectMusic extends Component {
 
   conversion(oldFiles, output){
     console.log('Starting conversion!')
-    const command = new ffmpeg();
     const artistDir = this.state.dir+'/'+this.state.artist
     const albumDir = artistDir + '/' + this.state.album
 
     this.createFolders(artistDir, albumDir)
 
-    oldFiles.map((file) =>
-      command.input(file)
-      .audioCodec('libmp3lame')
-      .on('error', function(err) {
-        console.log('An error occurred: ' + err.message);
-      })
-      .on('end', function() {
-        console.log('Processing finished !');
-      })
-      .save(
-        output + '/' + file.split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3'))
-    )
+    for(let i = 0; i<oldFiles.length; i++){
+      const command = new ffmpeg();
+      command.input(oldFiles[i])
+      command.audioCodec('libmp3lame')
+        .audioBitrate(320)
+        .format('mp3')
+        .on('error', function(err) {
+          console.log('An error occurred: ' + err.message);
+        })
+        .on('end', function() {
+          console.log('Processing finished !');
+        })
+        .save(
+          output + '/' + oldFiles[i].split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
+          )
+    }
   }
 
   render () {
@@ -244,19 +247,22 @@ class SelectDefault extends Component {
     console.log('Starting conversion!')
     const command = new ffmpeg();
 
-    oldFiles.map((file) =>
-      command.input(file)
-      .audioCodec('libmp3lame')
-      .on('error', function(err) {
-        console.log('An error occurred: ' + err.message);
-      })
-      .on('end', function() {
-        console.log('Processing finished !');
-      })
-      .save(
-        output + '/' + file.split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
-        )
-    )
+    for(let i = 0; i<oldFiles.length; i++){
+      const command = new ffmpeg();
+      command.input(oldFiles[i])
+      command.audioCodec('libmp3lame')
+        .audioBitrate(320)
+        .format('mp3')
+        .on('error', function(err) {
+          console.log('An error occurred: ' + err.message);
+        })
+        .on('end', function() {
+          console.log('Processing finished !');
+        })
+        .save(
+          output + '/' + oldFiles[i].split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
+          )
+    }
   }
 
   render () {
