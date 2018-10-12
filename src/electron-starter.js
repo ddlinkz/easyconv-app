@@ -11,16 +11,6 @@ const BrowserWindow = electron.BrowserWindow
 
 const store = new Store();
 
-if(store.get('firsttime')){
-  store.set('firsttime', true)
-  store.set('directory', 'Add your directory here')
-}
-
-/*ipcMain.on('asynchronous-message', (event, arg) => {
-  console.log(arg);
-  event.sender.send('async-reply', 'pong');
-});*/
-
 // Select Form Launch and Save
 // On launch, respond with stored select
 ipcMain.on('radio-select-launch', (event, arg) => {
@@ -55,7 +45,6 @@ ipcMain.on('default-dir-save', (event, arg) => {
   console.log('Defualt Select saved')
   store.set('defaultdirselect', arg)
 })
-
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.

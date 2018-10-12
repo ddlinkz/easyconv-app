@@ -38,7 +38,8 @@ if(debug) {
 // TODO: //
 //////////////////////////////
 //
-// Actual Conversion
+// If folders DNE, create them
+// Progress bars?
 //
 //////////////////////////////
 
@@ -52,16 +53,25 @@ class App extends Component {
 
 // Forms to show when Music is selected
 class SelectMusic extends Component {
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = {
       artist: '',
       album: '',
-      dir: ''
+      dir: '',
+      files: props.files
     }
 
+    this.handleClick = this.handleClick.bind(this)
     this.musicDirInput = React.createRef();
     this.handleChange = this.handleChange.bind(this)
+  }
+
+  // Update props on newly passed props
+  static getDerivedStateFromProps(nextProps) {
+    return{
+      files: nextProps.files
+    }
   }
 
   // Setting state using data from async request
@@ -89,6 +99,30 @@ class SelectMusic extends Component {
     this.setState({
         [name]: value
     })
+  }
+
+  handleClick() {
+    const {files, dir, artist, album} = this.state
+    this.conversion(files,dir+'/'+artist+'/'+album)
+  }
+
+  conversion(oldFiles, output){
+    console.log('Starting conversion!')
+    const command = new ffmpeg();
+
+    oldFiles.map((file) =>
+      command.input(file)
+      .audioCodec('libmp3lame')
+      .on('error', function(err) {
+        console.log('An error occurred: ' + err.message);
+      })
+      .on('end', function() {
+        console.log('Processing finished !');
+      })
+      .save(
+        output + '/' + file.split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
+        )
+    )
   }
 
   render () {
@@ -128,6 +162,9 @@ class SelectMusic extends Component {
               onChange={this.handleChange} />
           </label>
         </form>
+        <button onClick={this.handleClick}>
+          Start Conversion
+        </button>
       </div>
     )
   };
@@ -135,14 +172,23 @@ class SelectMusic extends Component {
 
 // Forms to show when Default is selected
 class SelectDefault extends Component {
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = {
-      dir: ''
+      dir: '',
+      files: props.files
     }
     
     this.defaultDirInput = React.createRef();
     this.handleChange = this.handleChange.bind(this)
+    this.handleClick = this.handleClick.bind(this)
+  }
+
+  // Update props on newly passed props
+  static getDerivedStateFromProps(nextProps) {
+    return{
+      files: nextProps.files
+    }
   }
 
   // Setting state using data from async request
@@ -172,6 +218,30 @@ class SelectDefault extends Component {
     })
   }
 
+  handleClick() {
+    const {files, dir} = this.state
+    this.conversion(files,dir)
+  }
+
+  conversion(oldFiles, output){
+    console.log('Starting conversion!')
+    const command = new ffmpeg();
+
+    oldFiles.map((file) =>
+      command.input(file)
+      .audioCodec('libmp3lame')
+      .on('error', function(err) {
+        console.log('An error occurred: ' + err.message);
+      })
+      .on('end', function() {
+        console.log('Processing finished !');
+      })
+      .save(
+        output + '/' + file.split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
+        )
+    )
+  }
+
   render () {
     return(
       <div className="selectdefault">
@@ -196,6 +266,9 @@ class SelectDefault extends Component {
             <br/>
           </label>
         </form>
+        <button onClick={this.handleClick}>
+          Start Conversion
+        </button>
       </div>
     )
   };
@@ -205,9 +278,9 @@ class SelectDefault extends Component {
 function SelectForm(props) {
   const selection = props.selection
   if(selection === '1'){
-    return <SelectDefault />
+    return <SelectDefault files={props.files}/>
   } else {
-    return <SelectMusic />
+    return <SelectMusic files={props.files}/>
   } 
 }
 
@@ -239,9 +312,17 @@ class RadioSelect extends Component {
     super(props)
     this.state = {
       selectedOption: '',
+      files: props.files
     }
-    this.handleClick = this.handleClick.bind(this)
+
     this.handleChange = this.handleChange.bind(this)
+  }
+
+  // Update props on newly passed props
+  static getDerivedStateFromProps(nextProps) {
+    return{
+      files: nextProps.files
+    }
   }
 
   // On mount, set selectedOption to previously used
@@ -262,8 +343,7 @@ class RadioSelect extends Component {
 
   render() {
     let choices = [{ text: 'Default', value: '1' },
-                     { text: 'Music', value: '2' }
-    ]
+                     { text: 'Music', value: '2' }]
 
     return (
       <div className="radioselect">
@@ -272,7 +352,9 @@ class RadioSelect extends Component {
           options={choices}
           onChange={(e) => this.handleChange(e)}
           selected={this.state.selectedOption} />
-        <SelectForm selection={this.state.selectedOption} />
+        <SelectForm 
+          selection={this.state.selectedOption}
+          files={this.state.files} />
         <br/>
       </div>
     )
@@ -283,7 +365,7 @@ class RadioSelect extends Component {
 function StartButton (props){
   return (
     <div className="convert">
-      <button onClick={props.serializeFiles}>Start Conversion</button>
+      <button onClick={props.conversion}>Start Conversion</button>
     </div>
   )
 }
@@ -322,31 +404,6 @@ class MusicList extends Component {
     this.serializeFiles = this.serializeFiles.bind(this);
     this.clearList = this.clearList.bind(this);
   }
-
-  componentDidMount() {
-    /*ipcRenderer.on('async-reply', (event, arg) => {
-      console.log(arg);
-    });
-    ipcRenderer.send('asynchronous-message', 'ping');*/
-  }
-
-  conversionProcess(file, output) {
-    const command = new ffmpeg();
-    const newFile = file.split('.').slice(0, -1).join('.')
-
-    command.input(file)
-    .audioCodec('libmp3lame')
-    .on('error', function(err) {
-      console.log('An error occurred: ' + err.message);
-    })
-    .on('end', function() {
-      console.log('Processing finished !');
-    })
-    .save(output);
-  }
-  /*componentWillUnmount() {
-    console.log('check');
-  }*/
 
   // File drag enter React function
   onDragEnter() {
@@ -451,8 +508,7 @@ class MusicList extends Component {
           <h1><i>EasyConv</i></h1>
           <p>Drop files onto the app to prepare them for conversion.</p>
           <h2>Directory Selection</h2>
-          <RadioSelect />
-          <StartButton serializeFiles={() => this.serializeFiles()} />
+          <RadioSelect files={files.map((file) => file.path)}/>
           <ClearList clearList={() => this.clearList()}/>
           <h2>Dropped files</h2>
           <div className="scroll">
