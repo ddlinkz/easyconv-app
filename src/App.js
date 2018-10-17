@@ -43,8 +43,7 @@ if(debug) {
 // TODO: //
 //////////////////////////////
 //
-// Progress bars?
-// Requires ffprobe
+// Progress Bars
 //
 //////////////////////////////
 
@@ -56,278 +55,89 @@ class App extends Component {
   }
 }
 
-// Forms to show when Music is selected
+//
+// User Settings Components
+//
+
 class SelectMusic extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      artist: '222',
-      album: 'TEST',
-      dir: '',
-      files: props.files
-    }
-
-    this.handleClick = this.handleClick.bind(this)
-    this.musicDirInput = React.createRef();
-    this.handleChange = this.handleChange.bind(this)
-  }
-
-  // Update props on newly passed props
-  static getDerivedStateFromProps(nextProps) {
-    return{
-      files: nextProps.files
-    }
-  }
-
-  // Setting state using data from async request
-  componentDidMount() {
-    ipcRenderer.once('music-dir-launch-resp', (event, arg) => {
-      this.setState({
-        dir: arg
-      })
-    });
-    ipcRenderer.send('music-dir-launch', 'music dir msg sent');
-  }
-
-  handleChange(event) {
-    let name = event.target.name
-    let value = event.target.value
-
-    if(name === 'dir-file-input'){
-      value = this.musicDirInput.current.files[0].path
-      ipcRenderer.send('music-dir-save', value)
-      name = 'dir'
-    } else if(name === 'dir'){
-      ipcRenderer.send('music-dir-save', value)
-    }
-
-    this.setState({
-        [name]: value
-    })
-  }
-
-  handleClick() {
-    const {files, dir, artist, album} = this.state
-    this.conversion(files,dir+'/'+artist+'/'+album)
-  }
-
-  createFolders(artistDir, albumDir) {
-    // if Artist directory DNE, make it
-    if(!fs.existsSync(artistDir)){
-      fs.mkdir(artistDir, err => {
-        if (err && err.code != 'EEXIST') throw 'up'
-      })
-    }
-    // if Album directory DNE, make it
-    if(!fs.existsSync(albumDir)){
-      fs.mkdir(albumDir, err => {
-        if (err && err.code != 'EEXIST') throw 'up'
-      })
-    }
-  }
-
-  conversion(oldFiles, output){
-    console.log('Starting conversion!')
-    const artistDir = this.state.dir+'/'+this.state.artist
-    const albumDir = artistDir + '/' + this.state.album
-
-    this.createFolders(artistDir, albumDir)
-
-    for(let i = 0; i<oldFiles.length; i++){
-      const command = new ffmpeg();
-      command.input(oldFiles[i])
-      command.audioCodec('libmp3lame')
-        .audioBitrate(320)
-        .format('mp3')
-        .on('error', function(err) {
-          console.log('An error occurred: ' + err.message);
-        })
-        .on('progress', function(progress) {
-          console.log('Processing: ' + progress.percent + '% done');
-        })
-        .on('end', function() {
-          console.log('Processing finished !');
-        })
-        .save(output + '/' + oldFiles[i].split("/").pop().split('.')
-                                        .slice(0, -1).join('.')
-                                        .concat('.mp3'))
-    }
-  }
-
-  render () {
+  render() {
     return(
       <div className="selectmusic">
-        <h3>Choose your music directory</h3>
-        <p>This option will render your
-           files and place them into your music library</p>
-        <input
-          name="dir-file-input" 
-          type="file" 
-          ref={this.musicDirInput}
-          webkitdirectory="true" 
-          onChange={this.handleChange} />
         <br/>
         <br/>
         <form>
           <label>
             Directory:
             <input
-              name="dir"
+              name="musicDir"
               type="text"
-              value={this.state.dir}
-              onChange={this.handleChange} />
+              value={this.props.musicDir}
+              onChange={this.props.onChange} />
             <br/>
             Artist:
             <input 
-              name="artist"
+              name="artistForm"
               type="text" 
-              value={this.state.artist} 
-              onChange={this.handleChange} />
+              value={this.props.artistForm} 
+              onChange={this.props.onChange} />
             Album:
             <input
-              name="album"
+              name="albumForm"
               type="text" 
-              value={this.state.album} 
-              onChange={this.handleChange} />
+              value={this.props.albumForm} 
+              onChange={this.props.onChange} />
           </label>
         </form>
-        <button onClick={this.handleClick}>
-          Start Conversion
-        </button>
       </div>
-    )
-  };
+      )
+  }
 }
 
-// Forms to show when Default is selected
 class SelectDefault extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      dir: '',
-      files: props.files
-    }
-    
-    this.defaultDirInput = React.createRef();
-    this.handleChange = this.handleChange.bind(this)
-    this.handleClick = this.handleClick.bind(this)
-  }
-
-  // Update props on newly passed props
-  static getDerivedStateFromProps(nextProps) {
-    return{
-      files: nextProps.files
-    }
-  }
-
-  // Setting state using data from async request
-  componentDidMount(){
-    ipcRenderer.once('default-dir-launch-resp', (event, arg) => {
-      this.setState({
-        dir: arg
-      })
-    })
-    ipcRenderer.send('default-dir-launch', 'default dir msg sent')
-  }
-
-  handleChange(event) {
-    let name = event.target.name
-    let value = event.target.value
-
-    // Handling for two seperate input forms
-    if(name === 'dir-file-input'){
-      value = this.defaultDirInput.current.files[0].path
-      ipcRenderer.send('default-dir-save', value)
-      name = 'dir'
-    } else if(name === 'dir'){
-      ipcRenderer.send('default-dir-save', value)
-    }
-    this.setState({
-      [name]: value
-    })
-  }
-
-  handleClick() {
-    const {files, dir} = this.state
-    this.conversion(files,dir)
-  }
-
-  conversion(oldFiles, output){
-    console.log('Starting conversion !')
-    const command = new ffmpeg();
-
-    //let times = []
-    //times[0] = performance.now()
-    for(let i = 0; i<oldFiles.length; i++){
-      const command = new ffmpeg();
-      command.input(oldFiles[i])
-      command.audioCodec('libmp3lame')
-        .audioBitrate(320)
-        .format('mp3')
-        .on('error', function(err) {
-          console.log('An error occurred: ' + err.message);
-        })
-        .on('end', function() {
-          //times[i+1] = performance.now()
-          console.log('Processing finished !');
-          //console.log('This took ' + (times[i+1] - times[0]) + ' milliseconds')
-        })
-        .save(
-          output + '/' + oldFiles[i].split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
-          )
-    }
-  }
-
-  render () {
+  render() {
     return(
       <div className="selectdefault">
-        <h3>Default</h3>
-        <p>This option will render your files and place them
-            in a directory of your choice</p>
-        <input
-          name="dir-file-input" 
-          type="file" 
-          ref={this.defaultDirInput}
-          webkitdirectory="true" 
-          onChange={this.handleChange} />
+        <br/>
         <br/>
         <form>
           <label>
           Directory:
             <input
-              name="dir"
+              name="defaultDir"
               type="text"
-              value={this.state.dir}
-              onChange={this.handleChange} />
+              value={this.props.defaultDir}
+              onChange={this.props.onChange} />
             <br/>
           </label>
         </form>
-        <button onClick={this.handleClick}>
-          Start Conversion
-        </button>
       </div>
     )
-  };
+  }
 }
 
-// Returns the proper component based on RadioSelect
-function SelectForm(props) {
-  const selection = props.selection
-  if(selection === '1'){
-    return <SelectDefault files={props.files}/>
-  } else {
-    return <SelectMusic files={props.files}/>
-  } 
+class RadioSelect extends Component {
+  render() {
+    return(
+      <div className="radioselect">
+        <h2>Directory Selection</h2>
+        <RadioOption
+          name="formselect"
+          options={this.props.choices}
+          onChange={this.props.onChange}
+          selected={this.props.selectedOption} />
+        <br/>
+      </div>
+    )
+  }
 }
 
-// Takes in an array of choice options to appear
 function RadioOption ({options, selected, onChange}){
   return (
     <div className="radiooption">
       {options.map((choice, index) => (
         <label key={index}>
           <input type="radio"
-            name="vote"
+            name="selectedOption"
             value={choice.value}
             key={index}
             checked={selected === choice.value}
@@ -339,75 +149,48 @@ function RadioOption ({options, selected, onChange}){
   )
 }
 
-// Chooses which user preferences are shown for Regular Conversion
-// and S2L (straight to library) Conversion
-// Music - S2L
-// Default - Regular
-class RadioSelect extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      selectedOption: '',
-      files: props.files
-    }
+//
+// Button Components
+//
 
-    this.handleChange = this.handleChange.bind(this)
-  }
-
-  // Update props on newly passed props
-  static getDerivedStateFromProps(nextProps) {
-    return{
-      files: nextProps.files
-    }
-  }
-
-  // On mount, set selectedOption to previously used
-  componentDidMount() {
-    ipcRenderer.once('radio-select-launch-resp', (event, arg) => {
-      this.setState({
-        selectedOption: arg
-      })
-    });
-    ipcRenderer.send('radio-select-launch', 'radio mount msg sent');
-  }
-
-  // When the select is changed, save and store option
-  handleChange(event) {
-    ipcRenderer.send('radio-select-save', event.target.value);
-    this.setState({selectedOption: event.target.value})
-  }
-
-  render() {
-    let choices = [{ text: 'Default', value: '1' },
-                     { text: 'Music', value: '2' }]
-
-    return (
-      <div className="radioselect">
-        <RadioOption
-          name="formselect"
-          options={choices}
-          onChange={(e) => this.handleChange(e)}
-          selected={this.state.selectedOption} />
-        <SelectForm 
-          selection={this.state.selectedOption}
-          files={this.state.files} />
-        <br/>
-      </div>
-    )
-  };
-}
-
-// onClick causes MusicList to clear it's state of files
-function ClearList (props){
-  return (
-    <div className="clearlist">
-      <button onClick={props.clearList}>Clear List</button>
-    </div>
+function StartConversion (props){
+  return(
+    <button onClick={props.conversion}>Start Conversion</button>
   )
 }
 
-// onClick should define removing the component from the MusicList
-// MusicList would then handleClick and remove MusicFile from list.
+function ClearList (props){
+  return (
+    <button onClick={props.clearList}>Clear List</button>
+  )
+}
+
+//
+// Input elements requiring Ref
+//
+
+const MusicDirInput = React.forwardRef((props, ref) => (
+  <input
+    name="music-dir-file-input" 
+    type="file" 
+    ref={ref}
+    webkitdirectory="true" 
+    onChange={props.onChange} />
+))
+
+const DefaultDirInput = React.forwardRef((props, ref) => (
+  <input
+    name="default-dir-file-input" 
+    type="file" 
+    ref={ref}
+    webkitdirectory="true" 
+    onChange={props.onChange} />
+))
+
+//
+// File Components
+//
+
 function MusicFile (props){
   return (
     <div className="musicfile">
@@ -417,19 +200,56 @@ function MusicFile (props){
   )
 }
 
-// Main Music component
-// Contains dropzone for files
+//
+// Main Component
+//
+
 class MusicList extends Component {
   constructor() {
     super()
     this.state = { 
       accept: '',
       files: [],
-      dropzoneActive: false 
+      dropzoneActive: false,
+      selectedOption: '',
+      defaultDir: '',
+      musicDir: '',
+      artistForm: '',
+      albumForm: ''
     }
+    this.musicDirInput = React.createRef();
+    this.defaultDirInput = React.createRef();
+
+    this.handleChange = this.handleChange.bind(this);
     this.removeItem = this.removeItem.bind(this);
-    this.serializeFiles = this.serializeFiles.bind(this);
     this.clearList = this.clearList.bind(this);
+  }
+
+  componentDidMount() {
+    // Load up last selected radio optoin
+    ipcRenderer.once('radio-select-launch-resp', (event, arg) => {
+      this.setState({
+        selectedOption: arg
+      })
+    })
+    ipcRenderer.send('radio-select-launch', 'radio mount msg sent')
+
+    // Load music direcotry
+    ipcRenderer.once('music-dir-launch-resp', (event, arg) => {
+      this.setState({
+        musicDir: arg
+      })
+    })
+    ipcRenderer.send('music-dir-launch', 'music dir msg sent')
+
+    // Load default directory
+    ipcRenderer.once('default-dir-launch-resp', (event, arg) => {
+      this.setState({
+        defaultDir: arg
+      })
+    })
+    ipcRenderer.send('default-dir-launch', 'default dir msg sent')
+
   }
 
   // File drag enter React function
@@ -492,18 +312,140 @@ class MusicList extends Component {
     })
   }
 
-  // TODO: Can probably get rid of this
-  // Takes list of files, takes filetype string, replaces with .mp3
-  // TODO: Make applible to any filetype??
-  serializeFiles() {
-    const serialFiles = this.state.files.map((f) => {
-      f = f.path
-      const newFile = f.split('.').slice(0, -1).join('.')
-      //this.conversionProcess(f, newFile + '.mp3');
-    });
-    console.log(this.state.files);
-    //ipcRenderer.send('file-list-test', serialFiles);  
-    //console.log(serialFiles);
+  // Handles changes for forms and directory changes
+  handleChange(event) {    
+    let name = event.target.name
+    let value = event.target.value
+
+    if(name === 'default-dir-file-input'){
+      value = this.defaultDirInput.current.files[0].path
+      ipcRenderer.send('default-dir-save', value)
+      name = 'defaultDir'
+    } else if(name === 'music-dir-file-input'){
+      value = this.musicDirInput.current.files[0].path
+      ipcRenderer.send('music-dir-save', value)
+      name = 'musicDir'
+    } else if(name === 'defaultDir'){
+      ipcRenderer.send('default-dir-save', value)
+    } else if(name === 'musicDir'){
+      ipcRenderer.send('music-dir-save', value)
+    } else if(name === 'selectedOption'){
+      ipcRenderer.send('radio-select-save', value)
+    }
+
+    this.setState({
+      [name]: value
+    })
+  }
+  
+  renderSelect() {
+    let choices = [{ text: 'Default', value: '1' },
+                   { text: 'Music', value: '2' }]
+    return (
+      <RadioSelect 
+        onChange={(e) => this.handleChange(e)}
+        selectedOption={this.state.selectedOption}
+        choices={choices}
+        />
+    )
+  }
+
+  // Depending on selectedOption, returns selected Div
+  renderSettings() {
+    if(this.state.selectedOption === '1'){
+      return (<div className="user-settings">
+                <h3>Default</h3>
+                <p>This option will render your files and place them
+                    in a directory of your choice</p>
+                <br/>
+                <DefaultDirInput 
+                  ref={this.defaultDirInput}
+                  onChange={(e) => this.handleChange(e)}
+                  />
+                <SelectDefault
+                  defaultDirInput={this.defaultDirInput}
+                  defaultDir={this.state.defaultDir}
+                  onChange={(e) => this.handleChange(e)}
+                  />
+              </div>
+              )
+    } else {
+      return (<div className="user-settings">
+                <h3>Choose your music directory</h3>
+                <p>This option will render your
+                  files and place them into your music library</p>
+                <br/>
+                <MusicDirInput
+                  ref={this.musicDirInput}
+                  onChange={(e) => this.handleChange(e)}
+                  />
+                <SelectMusic 
+                  musicDirInput={this.musicDirInput}
+                  musicDir={this.state.musicDir}
+                  artistForm={this.state.artistForm}
+                  albumForm={this.state.albumForm}
+                  onChange={(e) => this.handleChange(e)}
+                  />
+              </div>)
+    }
+  }
+
+  createFolders(artistDir, albumDir) {
+    // if Artist directory DNE, make it
+    if(!fs.existsSync(artistDir)){
+      fs.mkdir(artistDir, err => {
+        if (err && err.code != 'EEXIST') throw 'up'
+      })
+    }
+    // if Album directory DNE, make it
+    if(!fs.existsSync(albumDir)){
+      fs.mkdir(albumDir, err => {
+        if (err && err.code != 'EEXIST') throw 'up'
+      })
+    }
+  }
+
+  // If MusicSelected, output = dir/artist/album
+  // if DefaultSelected, output = dir
+  conversion(){
+    console.log('Starting conversion !')
+    const option = this.state.selectedOption
+    let output = ''
+    if(option === '1'){
+      output = this.state.defaultDir
+    } else {
+      output = this.state.musicDir + '/' +
+               this.state.artistForm + '/' +
+               this.state.albumForm
+      this.createFolders(this.state.musicDir + '/' +
+                         this.state.artistForm,
+                         output)
+    }
+
+    const oldFiles = this.state.files.map((file) => file.path)
+    //let times = []
+    //times[0] = performance.now()
+    for(let i = 0; i<oldFiles.length; i++){
+      const command = new ffmpeg();
+      command.input(oldFiles[i])
+      command.audioCodec('libmp3lame')
+        .audioBitrate(320)
+        .format('mp3')
+        .on('error', function(err) {
+          console.log('An error occurred: ' + err.message);
+        })
+        .on('progress', function(progress) {
+          console.log('Processing: ' + progress.percent + '% done');
+        })
+        .on('end', function() {
+          //times[i+1] = performance.now()
+          console.log('Processing finished !');
+          //console.log('This took ' + (times[i+1] - times[0]) + ' milliseconds')
+        })
+        .save(
+          output + '/' + oldFiles[i].split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
+          )
+    }
   }
 
   render() { 
@@ -534,13 +476,18 @@ class MusicList extends Component {
       >
         { dropzoneActive && <div style={overlayStyle}>Drop files...</div> }
         <div className="App" style={divStyle} >
-          <h1><i>EasyConv</i></h1>
-          <p>Drop files onto the app to prepare them for conversion.</p>
-          <h2>Directory Selection</h2>
-          <RadioSelect files={files.map((file) => file.path)}/>
-          <ClearList clearList={() => this.clearList()}/>
-          <h2>Dropped files</h2>
+          <div className="header">
+            <h1 className="main-header"><i>EasyConv</i></h1>
+          </div>
+          <div className="sub-header">
+            <p className="sub-header">Drop files onto the app to prepare them for conversion.</p>
+          </div>
+          <div className="user-settings">
+            {this.renderSelect()}
+            {this.renderSettings()}
+          </div>
           <div className="scroll">
+            <h2>Dropped files</h2>
             <ul>
               {
                 files.map((file,i) => <MusicFile 
@@ -551,6 +498,8 @@ class MusicList extends Component {
               }
             </ul>
           </div>
+          <StartConversion conversion={() => this.conversion()}/>
+          <ClearList clearList={() => this.clearList()}/>
         </div>
       </Dropzone>
     );
