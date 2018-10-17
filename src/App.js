@@ -225,6 +225,9 @@ class MusicList extends Component {
     this.clearList = this.clearList.bind(this);
   }
 
+  // ======================
+  // Load up saved settings
+  // ======================
   componentDidMount() {
     // Load up last selected radio optoin
     ipcRenderer.once('radio-select-launch-resp', (event, arg) => {
@@ -249,8 +252,11 @@ class MusicList extends Component {
       })
     })
     ipcRenderer.send('default-dir-launch', 'default dir msg sent')
-
   }
+  
+  // ====================
+  // React File Functions
+  // ====================
 
   // File drag enter React function
   onDragEnter() {
@@ -297,18 +303,22 @@ class MusicList extends Component {
     });
   }
 
-  // Remove an item from the list
-  removeItem(item) { 
-    const newFiles = this.state.files.filter(el => el !== item)
-    this.setState({
-      files: newFiles
-    })
-  }
+  // ================
+  // Modifying State Functions
+  // ================
 
   // Sets state of files to an empty array
   clearList() {
     this.setState({
       files: []
+    })
+  }
+
+  // Remove an item from the list
+  removeItem(item) { 
+    const newFiles = this.state.files.filter(el => el !== item)
+    this.setState({
+      files: newFiles
     })
   }
 
@@ -338,6 +348,10 @@ class MusicList extends Component {
     })
   }
   
+  // ==========================
+  // Render Component Functions
+  // ==========================
+
   renderSelect() {
     let choices = [{ text: 'Default', value: '1' },
                    { text: 'Music', value: '2' }]
@@ -390,6 +404,10 @@ class MusicList extends Component {
     }
   }
 
+  // ====================
+  // Conversion functions
+  // ====================
+
   createFolders(artistDir, albumDir) {
     // if Artist directory DNE, make it
     if(!fs.existsSync(artistDir)){
@@ -405,8 +423,6 @@ class MusicList extends Component {
     }
   }
 
-  // If MusicSelected, output = dir/artist/album
-  // if DefaultSelected, output = dir
   conversion(){
     console.log('Starting conversion !')
     const option = this.state.selectedOption
@@ -447,6 +463,10 @@ class MusicList extends Component {
           )
     }
   }
+
+  // ===============
+  // Render Function
+  // ===============
 
   render() { 
     const { accept, files, dropzoneActive } = this.state;
