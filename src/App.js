@@ -45,7 +45,10 @@ if(debug) {
 // TODO: //
 //////////////////////////////
 //
-// Progress Bars
+// Styling
+// Better window while on OSX
+// Conversion Complete
+// Only whole numbers
 //
 //////////////////////////////
 
@@ -66,28 +69,35 @@ class SelectMusic extends Component {
     return(
       <div className="selectmusic">
         <br/>
-        <br/>
         <form>
           <label>
-            Directory:
-            <input
-              name="musicDir"
-              type="text"
-              value={this.props.musicDir}
-              onChange={this.props.onChange} />
-            <br/>
-            Artist:
-            <input 
-              name="artistForm"
-              type="text" 
-              value={this.props.artistForm} 
-              onChange={this.props.onChange} />
-            Album:
-            <input
-              name="albumForm"
-              type="text" 
-              value={this.props.albumForm} 
-              onChange={this.props.onChange} />
+            <div className="selectmusicitem">
+              Directory:
+              <input
+                className="submissionfield"
+                name="musicDir"
+                type="text"
+                value={this.props.musicDir}
+                onChange={this.props.onChange} />
+            </div>
+            <div className="selectmusicitem">
+              Artist:
+              <input
+                className="submissionfield"
+                name="artistForm"
+                type="text" 
+                value={this.props.artistForm} 
+                onChange={this.props.onChange} />
+            </div>
+            <div className="selectmusicitem">
+              Album:
+              <input
+                className="submissionfield"
+                name="albumForm"
+                type="text" 
+                value={this.props.albumForm} 
+                onChange={this.props.onChange} />
+            </div>
           </label>
         </form>
       </div>
@@ -105,6 +115,7 @@ class SelectDefault extends Component {
           <label>
           Directory:
             <input
+              className="submissionfield"
               name="defaultDir"
               type="text"
               value={this.props.defaultDir}
@@ -206,7 +217,6 @@ class MusicFileList extends Component{
   render() {
   return(
     <div className="scroll">
-      <h2>Dropped files</h2>
       <ul>
         {
           this.props.files.map((file,i) => <MusicFile 
@@ -225,7 +235,7 @@ function ChooseList (props){
   if(props.active){
     return(<ProgressBarList files={props.files} progress={props.progress}/>)
   } else {
-    return( <MusicFileList files={props.files} removeItem={props.removeItem}/>)
+    return(<MusicFileList files={props.files} removeItem={props.removeItem}/>)
   }
 }
 
@@ -233,10 +243,10 @@ class ProgressBarList extends Component{
   render() {
     return(
       <div className="scroll">
-        <h2>Dropped files</h2>
         <ul>
           {
             this.props.files.map((file, i) => <Progress
+                                            className="progress"
                                             key={file.path}
                                             percent={this.props.progress[i]}
                                             status="active"/>
@@ -539,7 +549,8 @@ class MusicList extends Component {
           console.log('An error occurred: ' + err.message);
         })
         .on('progress', function(progress) {
-          ipcRenderer.send('progress', {file: i, progress: progress.percent})
+          let rounded = Math.round(progress.percent)
+          ipcRenderer.send('progress', {file: i, progress: rounded})
         })
         .on('end', function() {
           //times[i+1] = performance.now()
@@ -574,13 +585,8 @@ class MusicList extends Component {
       bottom: 0,
       left:0,
       background: 'rgba(0,0,0,0.5)',
-      textAlign: 'center',
+      //textAlign: 'center',
       color: '#fff'
-    };
-    const divStyle = {
-      position: 'relative',
-      textAlign: 'left',
-      left: '10px',
     };
     return(
       <Dropzone 
@@ -592,7 +598,7 @@ class MusicList extends Component {
         onDragLeave={this.onDragLeave.bind(this)}
       >
         { dropzoneActive && <div style={overlayStyle}>Drop files...</div> }
-        <div className="App" style={divStyle} >
+        <div className="App">
           <div className="header">
             <h1 className="main-header"><i>EasyConv</i></h1>
           </div>
@@ -603,11 +609,14 @@ class MusicList extends Component {
             {this.renderSelect()}
             {this.renderSettings()}
           </div>
-          <ChooseList 
-            active={this.state.conversionActive} 
-            files={files} 
-            progress={progress}
-            removeItem={this.removeItem}/>
+          <div>
+            <h2>Dropped files</h2>
+            <ChooseList 
+              active={this.state.conversionActive} 
+              files={files} 
+              progress={progress}
+              removeItem={this.removeItem}/>
+          </div>
           <StartConversion conversion={() => this.conversion()}/>
           <ClearList clearList={() => this.clearList()}/>
         </div>

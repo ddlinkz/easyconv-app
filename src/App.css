@@ -1,10 +1,18 @@
+@font-face {
+  font-family: Roboto;
+  src: url(Roboto-Medium.ttf)
+}
+
 .App {
   display: grid;
+  background-color: #FFF;
   grid-template-rows: 50px 1fr 50px;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 300px 1fr;
   min-height: 100%;
-  text-align: center;
   height: 100vh;
+  -webkit-app-region: drag;
+  text-align: center;
+  font-family: Roboto;
 }
 
 .App-logo {
@@ -33,16 +41,34 @@
   left: 0;
   padding: 0;
   background: 'rgba(0,0,0,0.5)';
-  textAlign: 'center';
+  text-align: 'center';
   color: '#fff';
 }
 
+.user-settings {
+  padding: 5px;
+}
+
 .selectmusic {
-  float: left;
+  display: grid;
+  justify-items: stretch;
+  text-align: left;
+}
+
+.selectmusicitem {
+
 }
 
 .selectdefault {
-  float: left;
+  display: grid;
+  justify-items: stretch;
+  text-align: left;
+}
+
+.submissionfield {
+  height: 20px;
+  width: 100%;
+  font-size: 14px;
 }
 
 .clearlist {
@@ -52,19 +78,50 @@
 .scroll {
   overflow: hidden;
   overflow-y: scroll;
-  float: right;
+  height: inherit;
+  max-height: 350px;
+  padding: 0px 10px 0px 0px;
+}
+
+.progress {
+  width: 80%;
 }
 
 .main-header {
-  float: left;
 }
 
 .sub-header {
-  float: right;
+  padding: 8px 0px 0px 0px;
 }
 
 .header {
-  clear: both;
+}
+
+.musicfile {
+  text-align: left;
+  width: 90%;
+}
+
+/*div {
+  border-style: dashed;
+  border-color: #000000;
+}*/
+
+button:focus {
+  outline: 0;
+}
+
+button  :hover {
+}
+
+button {
+  border-color: #4CAF50;
+  background-color: #FFF;
+  font-family: Roboto;
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  color: #000000;
+  border-radius: 6px;
 }
 
 @keyframes App-logo-spin {
