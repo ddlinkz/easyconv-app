@@ -3,6 +3,8 @@ import './App.css';
 import Dropzone from 'react-dropzone'; //https://react-dropzone.netlify.com/
 import ffmpegpath from 'ffmpeg-static';
 import ffprobepath from 'ffprobe-static';
+import { Progress } from 'react-sweet-progress';
+import "react-sweet-progress/lib/style.css";
 
 const electron = window.require('electron');
 const fs = electron.remote.require('fs');
@@ -55,9 +57,9 @@ class App extends Component {
   }
 }
 
-//
+// ========================
 // User Settings Components
-//
+// ========================
 
 class SelectMusic extends Component {
   render() {
@@ -149,9 +151,9 @@ function RadioOption ({options, selected, onChange}){
   )
 }
 
-//
+// =================
 // Button Components
-//
+// =================
 
 function StartConversion (props){
   return(
@@ -165,9 +167,9 @@ function ClearList (props){
   )
 }
 
-//
+// ============================
 // Input elements requiring Ref
-//
+// ============================
 
 const MusicDirInput = React.forwardRef((props, ref) => (
   <input
@@ -187,9 +189,9 @@ const DefaultDirInput = React.forwardRef((props, ref) => (
     onChange={props.onChange} />
 ))
 
-//
+// ===============
 // File Components
-//
+// ===============
 
 function MusicFile (props){
   return (
@@ -200,9 +202,55 @@ function MusicFile (props){
   )
 }
 
-//
+class MusicFileList extends Component{  
+  render() {
+  return(
+    <div className="scroll">
+      <h2>Dropped files</h2>
+      <ul>
+        {
+          this.props.files.map((file,i) => <MusicFile 
+                            key={file.path+i}
+                            file={file}
+                            filepath={file.path.split("/").pop()}
+                            removeItem={() => this.props.removeItem(file)} 
+                          />)
+        }
+      </ul>
+    </div>
+  )}
+}
+
+function ChooseList (props){
+  if(props.active){
+    return(<ProgressBarList files={props.files} progress={props.progress}/>)
+  } else {
+    return( <MusicFileList files={props.files} removeItem={props.removeItem}/>)
+  }
+}
+
+class ProgressBarList extends Component{
+  render() {
+    return(
+      <div className="scroll">
+        <h2>Dropped files</h2>
+        <ul>
+          {
+            this.props.files.map((file, i) => <Progress
+                                            key={file.path}
+                                            percent={this.props.progress[i]}
+                                            status="active"/>
+              )
+          }
+        </ul>
+      </div>
+    )
+  }
+}
+
+// ==============
 // Main Component
-//
+// ==============
 
 class MusicList extends Component {
   constructor() {
@@ -215,7 +263,9 @@ class MusicList extends Component {
       defaultDir: '',
       musicDir: '',
       artistForm: '',
-      albumForm: ''
+      albumForm: '',
+      conversionActive: false,
+      progress: []
     }
     this.musicDirInput = React.createRef();
     this.defaultDirInput = React.createRef();
@@ -223,11 +273,13 @@ class MusicList extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.removeItem = this.removeItem.bind(this);
     this.clearList = this.clearList.bind(this);
+    this.stopConversion = this.stopConversion.bind(this);
   }
 
   // ======================
   // Load up saved settings
   // ======================
+
   componentDidMount() {
     // Load up last selected radio optoin
     ipcRenderer.once('radio-select-launch-resp', (event, arg) => {
@@ -252,6 +304,27 @@ class MusicList extends Component {
       })
     })
     ipcRenderer.send('default-dir-launch', 'default dir msg sent')
+
+    ipcRenderer.on('progress-resp', (event, arg) => {
+      let newProgress = []
+      if(this.state.progress === []){
+        newProgress = new Array(this.state.files.length)
+      } else {
+        newProgress = this.state.progress
+      }
+      newProgress[arg.file] = arg.progress
+      this.setState({
+        progress: newProgress
+      })
+      console.log('Progress received: ' + newProgress)
+    })
+
+    ipcRenderer.on('progress-done-resp', (event, arg) => {
+      this.setState({
+        conversionActive: false,
+        progress: []
+      })
+    })
   }
   
   // ====================
@@ -315,7 +388,7 @@ class MusicList extends Component {
   }
 
   // Remove an item from the list
-  removeItem(item) { 
+  removeItem(item) {
     const newFiles = this.state.files.filter(el => el !== item)
     this.setState({
       files: newFiles
@@ -412,19 +485,33 @@ class MusicList extends Component {
     // if Artist directory DNE, make it
     if(!fs.existsSync(artistDir)){
       fs.mkdir(artistDir, err => {
-        if (err && err.code != 'EEXIST') throw 'up'
+        if (err && err.code !== 'EEXIST') throw 'up'
       })
     }
     // if Album directory DNE, make it
     if(!fs.existsSync(albumDir)){
       fs.mkdir(albumDir, err => {
-        if (err && err.code != 'EEXIST') throw 'up'
+        if (err && err.code !== 'EEXIST') throw 'up'
       })
     }
   }
 
+  setConversion(){
+    this.setState({
+      conversionActive: true
+    })
+  }
+
+  stopConversion(){
+    this.setState({
+      conversionActive: false
+    })
+  }
+  
   conversion(){
     console.log('Starting conversion !')
+    this.setConversion()
+
     const option = this.state.selectedOption
     let output = ''
     if(option === '1'){
@@ -439,6 +526,7 @@ class MusicList extends Component {
     }
 
     const oldFiles = this.state.files.map((file) => file.path)
+    let finished = []
     //let times = []
     //times[0] = performance.now()
     for(let i = 0; i<oldFiles.length; i++){
@@ -451,16 +539,25 @@ class MusicList extends Component {
           console.log('An error occurred: ' + err.message);
         })
         .on('progress', function(progress) {
-          console.log('Processing: ' + progress.percent + '% done');
+          ipcRenderer.send('progress', {file: i, progress: progress.percent})
         })
         .on('end', function() {
           //times[i+1] = performance.now()
           console.log('Processing finished !');
+          finished.push('Done');
+          if(finished.length === oldFiles.length){
+            console.log('All processing finished.')
+            ipcRenderer.send('progress-done', 'Progress done')
+          }
           //console.log('This took ' + (times[i+1] - times[0]) + ' milliseconds')
         })
         .save(
           output + '/' + oldFiles[i].split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
           )
+    }
+    if(finished.length === oldFiles.length){
+      console.log('All processing finished.')
+      this.stopConversion()
     }
   }
 
@@ -469,7 +566,7 @@ class MusicList extends Component {
   // ===============
 
   render() { 
-    const { accept, files, dropzoneActive } = this.state;
+    const { accept, files, dropzoneActive , progress} = this.state;
     const overlayStyle = {
       position: 'absolute', 
       top: 0,
@@ -506,18 +603,11 @@ class MusicList extends Component {
             {this.renderSelect()}
             {this.renderSettings()}
           </div>
-          <div className="scroll">
-            <h2>Dropped files</h2>
-            <ul>
-              {
-                files.map((file,i) => <MusicFile 
-                                  key={file.path+i}
-                                  filepath={file.path.split("/").pop()}
-                                  removeItem={() => this.removeItem(file)} 
-                                />)
-              }
-            </ul>
-          </div>
+          <ChooseList 
+            active={this.state.conversionActive} 
+            files={files} 
+            progress={progress}
+            removeItem={this.removeItem}/>
           <StartConversion conversion={() => this.conversion()}/>
           <ClearList clearList={() => this.clearList()}/>
         </div>
@@ -527,3 +617,16 @@ class MusicList extends Component {
 }
 
 export default App;
+
+// state will keep track of progress for each file
+// when conversion starts, file list turns into progress bars for each file
+// on each progress update, the app will call a function that sets the state for the new percent
+// updateProgress function
+// updateProgress(file, progress){
+//
+// this.setState({
+//   fileProgress[file]: progress
+// });
+//
+
+// new class

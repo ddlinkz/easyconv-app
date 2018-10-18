@@ -46,6 +46,17 @@ ipcMain.on('default-dir-save', (event, arg) => {
   store.set('defaultdirselect', arg)
 })
 
+// Checking for progress
+ipcMain.on('progress', (event, arg) => {
+  console.log(arg)
+  event.sender.send('progress-resp', arg)
+})
+
+ipcMain.on('progress-done', (event, arg) => {
+  console.log(arg)
+  event.sender.send('progress-done-resp', 'Process done received')
+})
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow

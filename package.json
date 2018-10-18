@@ -25,6 +25,7 @@
   "devDependencies": {
     "electron": "^2.0.10",
     "ffprobe-static": "^3.0.0",
-    "react-dropzone": "^5.1.0"
+    "react-dropzone": "^5.1.0",
+    "react-sweet-progress": "^1.1.2"
   }
 }
