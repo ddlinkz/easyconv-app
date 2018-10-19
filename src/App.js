@@ -31,24 +31,11 @@ if(debug) {
   });
 }
 
-// SAMPLE COMMAND
-/*command.input('/Users/austinbrown/documents/samples/chippichippi.flac')
-  .audioCodec('libmp3lame')
-  .on('error', function(err) {
-    console.log('An error occurred: ' + err.message);
-  })
-  .on('end', function() {
-    console.log('Processing finished !');
-  })
-  .save('/Users/austinbrown/documents/samples/chippichippiSUCCESS.mp3');*/
-
 // TODO: //
 //////////////////////////////
 //
-// Styling
-// Better window while on OSX
-// Conversion Complete
-// Only whole numbers
+// readme.md
+// folder DNE in default
 //
 //////////////////////////////
 
@@ -138,7 +125,6 @@ class RadioSelect extends Component {
           options={this.props.choices}
           onChange={this.props.onChange}
           selected={this.props.selectedOption} />
-        <br/>
       </div>
     )
   }
@@ -168,13 +154,29 @@ function RadioOption ({options, selected, onChange}){
 
 function StartConversion (props){
   return(
-    <button onClick={props.conversion}>Start Conversion</button>
+    <button 
+      onClick={props.conversion}>
+        Start Conversion
+    </button>
+  )
+}
+
+function InProgress (){
+  return (
+    <button
+      className="inprogress"
+      disabled="true">
+        Conversion in Progress...
+    </button>
   )
 }
 
 function ClearList (props){
   return (
-    <button onClick={props.clearList}>Clear List</button>
+    <button 
+      onClick={props.clearList}>
+        Clear List
+    </button>
   )
 }
 
@@ -447,6 +449,11 @@ class MusicList extends Component {
     )
   }
 
+  renderStart() {
+    if(this.state.conversionActive) return <InProgress />
+    else return <StartConversion conversion={() => this.conversion()}/>
+  }
+
   // Depending on selectedOption, returns selected Div
   renderSettings() {
     if(this.state.selectedOption === '1'){
@@ -455,6 +462,9 @@ class MusicList extends Component {
                 <p>This option will render your files and place them
                     in a directory of your choice</p>
                 <br/>
+                <h4 className="directory">
+                  Change Directory:
+                </h4>
                 <DefaultDirInput 
                   ref={this.defaultDirInput}
                   onChange={(e) => this.handleChange(e)}
@@ -472,6 +482,9 @@ class MusicList extends Component {
                 <p>This option will render your
                   files and place them into your music library</p>
                 <br/>
+                <h4 className="directory">
+                  Change Directory:
+                </h4>
                 <MusicDirInput
                   ref={this.musicDirInput}
                   onChange={(e) => this.handleChange(e)}
@@ -585,7 +598,7 @@ class MusicList extends Component {
       bottom: 0,
       left:0,
       background: 'rgba(0,0,0,0.5)',
-      //textAlign: 'center',
+      textAlign: 'center',
       color: '#fff'
     };
     return(
@@ -600,10 +613,14 @@ class MusicList extends Component {
         { dropzoneActive && <div style={overlayStyle}>Drop files...</div> }
         <div className="App">
           <div className="header">
-            <h1 className="main-header"><i>EasyConv</i></h1>
+            <h1 className="main-header">
+              <i>EasyConv</i>
+            </h1>
           </div>
           <div className="sub-header">
-            <p className="sub-header">Drop files onto the app to prepare them for conversion.</p>
+            <p className="sub-header">
+              Drop files onto the app to prepare them for conversion.
+            </p>
           </div>
           <div className="user-settings">
             {this.renderSelect()}
@@ -617,7 +634,7 @@ class MusicList extends Component {
               progress={progress}
               removeItem={this.removeItem}/>
           </div>
-          <StartConversion conversion={() => this.conversion()}/>
+          {this.renderStart()}
           <ClearList clearList={() => this.clearList()}/>
         </div>
       </Dropzone>

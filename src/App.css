@@ -49,6 +49,14 @@
   padding: 5px;
 }
 
+.inprogress {
+  background: #e5e5e5;
+  outline: none;
+  -webkit-box-shadow: inset 0px 0px 5px #c1c1c1;
+     -moz-box-shadow: inset 0px 0px 5px #c1c1c1;
+          box-shadow: inset 0px 0px 5px #c1c1c1;
+}
+
 .selectmusic {
   display: grid;
   justify-items: stretch;
@@ -58,6 +66,10 @@
 .selectmusicitem {
 
 }
+
+.directory {
+  text-align: left;
+} 
 
 .selectdefault {
   display: grid;

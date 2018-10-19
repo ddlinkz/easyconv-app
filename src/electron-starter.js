@@ -62,7 +62,11 @@ ipcMain.on('progress-done', (event, arg) => {
 let mainWindow
 
 function createWindow () {
-  mainWindow = new BrowserWindow({titleBarStyle: 'hidden', width: 800, height: 600})
+  mainWindow = new BrowserWindow({titleBarStyle: 'hidden', 
+                                  width: 800, 
+                                  height: 600,
+                                  'minHeight': 540,
+                                  'minWidth': 600})
 
   // Create the browser window.
   const startUrl = process.env.ELECTRON_START_URL || url.format({
