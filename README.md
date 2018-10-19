@@ -1,6 +1,8 @@
 EasyConv
 ========
 
+![EasyConv](screencap1.png "preview")
+
 Drag and drop flac-to-mp3 conversion app built using Electron and React.
 
 In the project directory, run
