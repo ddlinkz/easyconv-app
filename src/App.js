@@ -34,9 +34,8 @@ if(debug) {
 // TODO: //
 //////////////////////////////
 //
-// readme.md
-// folder DNE in default
-//
+// better sizing
+// 
 //////////////////////////////
 
 class App extends Component {  
@@ -58,6 +57,14 @@ class SelectMusic extends Component {
         <br/>
         <form>
           <label>
+            <div className="selectmusicitem">
+              Create directory on conversion:
+              <input 
+                type="checkbox"
+                name="createOnConv"
+                checked={this.props.createOnConv}
+                onChange={this.props.onChange} />
+            </div>
             <div className="selectmusicitem">
               Directory:
               <input
@@ -100,14 +107,23 @@ class SelectDefault extends Component {
         <br/>
         <form>
           <label>
-          Directory:
-            <input
-              className="submissionfield"
-              name="defaultDir"
-              type="text"
-              value={this.props.defaultDir}
-              onChange={this.props.onChange} />
-            <br/>
+            <div className="selectmusicitem">
+              Create directory on conversion:
+                <input 
+                  type="checkbox"
+                  name="createOnConv"
+                  checked={this.props.createOnConv}
+                  onChange={this.props.onChange} />
+            </div>
+            <div className="selectmusicitem">
+              Directory:
+                <input
+                  className="submissionfield"
+                  name="defaultDir"
+                  type="text"
+                  value={this.props.defaultDir}
+                  onChange={this.props.onChange} />
+            </div>
           </label>
         </form>
       </div>
@@ -277,7 +293,8 @@ class MusicList extends Component {
       artistForm: '',
       albumForm: '',
       conversionActive: false,
-      progress: []
+      progress: [],
+      createOnConv: false
     }
     this.musicDirInput = React.createRef();
     this.defaultDirInput = React.createRef();
@@ -426,6 +443,8 @@ class MusicList extends Component {
       ipcRenderer.send('music-dir-save', value)
     } else if(name === 'selectedOption'){
       ipcRenderer.send('radio-select-save', value)
+    } else if(name === 'createOnConv'){
+      value = !this.state.createOnConv
     }
 
     this.setState({
@@ -472,6 +491,7 @@ class MusicList extends Component {
                 <SelectDefault
                   defaultDirInput={this.defaultDirInput}
                   defaultDir={this.state.defaultDir}
+                  createOnConv={this.state.createOnConv}
                   onChange={(e) => this.handleChange(e)}
                   />
               </div>
@@ -494,6 +514,7 @@ class MusicList extends Component {
                   musicDir={this.state.musicDir}
                   artistForm={this.state.artistForm}
                   albumForm={this.state.albumForm}
+                  createOnConv={this.state.createOnConv}
                   onChange={(e) => this.handleChange(e)}
                   />
               </div>)
@@ -504,16 +525,9 @@ class MusicList extends Component {
   // Conversion functions
   // ====================
 
-  createFolders(artistDir, albumDir) {
-    // if Artist directory DNE, make it
-    if(!fs.existsSync(artistDir)){
-      fs.mkdir(artistDir, err => {
-        if (err && err.code !== 'EEXIST') throw 'up'
-      })
-    }
-    // if Album directory DNE, make it
-    if(!fs.existsSync(albumDir)){
-      fs.mkdir(albumDir, err => {
+  createFolders(outputDir) {
+    if(!fs.existsSync(outputDir)){
+      fs.mkdir(outputDir, err => {
         if (err && err.code !== 'EEXIST') throw 'up'
       })
     }
@@ -536,16 +550,30 @@ class MusicList extends Component {
     this.setConversion()
 
     const option = this.state.selectedOption
+    const createOnConv = this.state.createOnConv
     let output = ''
     if(option === '1'){
       output = this.state.defaultDir
+      if(!fs.existsSync(output) && createOnConv){
+        this.createFolders(output)
+      } else {
+        alert("Directory selected does not exist!")
+        this.stopConversion()
+        return
+      }
     } else {
       output = this.state.musicDir + '/' +
                this.state.artistForm + '/' +
                this.state.albumForm
-      this.createFolders(this.state.musicDir + '/' +
-                         this.state.artistForm,
-                         output)
+      if(!fs.existsSync(output) && createOnConv){
+        this.createFolders(this.state.musicDir + '/' +
+                           this.state.artistForm)
+        this.createFolders(output)
+      } else {
+        alert("Directory selected does not exist!")
+        this.stopConversion()
+        return
+      }
     }
 
     const oldFiles = this.state.files.map((file) => file.path)
@@ -643,16 +671,3 @@ class MusicList extends Component {
 }
 
 export default App;
-
-// state will keep track of progress for each file
-// when conversion starts, file list turns into progress bars for each file
-// on each progress update, the app will call a function that sets the state for the new percent
-// updateProgress function
-// updateProgress(file, progress){
-//
-// this.setState({
-//   fileProgress[file]: progress
-// });
-//
-
-// new class
