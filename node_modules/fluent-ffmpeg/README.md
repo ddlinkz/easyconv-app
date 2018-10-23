@@ -1,5 +1,8 @@
 # Fluent ffmpeg-API for node.js [![Build Status](https://secure.travis-ci.org/fluent-ffmpeg/node-fluent-ffmpeg.svg?branch=master)](http://travis-ci.org/fluent-ffmpeg/node-fluent-ffmpeg)
 
+> **Fluent-ffmpeg is looking for new maintainers**
+> More details [on the wiki](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg/wiki/Looking-for-a-new-maintainer)
+
 This library abstracts the complex command-line usage of ffmpeg into a fluent, easy to use node.js module. In order to be able to use this module, make sure you have [ffmpeg](http://www.ffmpeg.org) installed on your system (including all necessary encoding libraries like libmp3lame or libx264).
 
 > This is the documentation for fluent-ffmpeg 2.x.
@@ -176,7 +179,7 @@ ffmpeg('/path/to/file.avi').loop('2:14.500');
 
 **Aliases**: `inputOption()`, `addInputOption()`, `addInputOptions()`, `withInputOption()`, `withInputOptions()`.
 
-This method allows passing any input-related option to ffmpeg.  You can call it with a single argument to pass a single option, optionnaly with a space-separated parameter:
+This method allows passing any input-related option to ffmpeg.  You can call it with a single argument to pass a single option, optionally with a space-separated parameter:
 
 ```js
 /* Single option */
@@ -629,7 +632,7 @@ ffmpeg('/path/to/file.avi').flvmeta().format('flv');
 
 **Aliases**: `outputOption()`, `addOutputOption()`, `addOutputOptions()`, `withOutputOption()`, `withOutputOptions()`, `addOption()`, `addOptions()`.
 
-This method allows passing any output-related option to ffmpeg.  You can call it with a single argument to pass a single option, optionnaly with a space-separated parameter:
+This method allows passing any output-related option to ffmpeg.  You can call it with a single argument to pass a single option, optionally with a space-separated parameter:
 
 ```js
 /* Single option */

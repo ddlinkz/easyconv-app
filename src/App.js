@@ -14,9 +14,7 @@ const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegpath.path);
 ffmpeg.setFfprobePath(ffprobepath.path);
 
-const debug = 'false';
-
-if(debug) {
+if(true) {
   fs.access(ffmpegpath.path, fs.constants.F_OK, (err) => {
     console.log(`${ffmpegpath.path} ${err ? 'does not exist' : 'exists'}`);
   });

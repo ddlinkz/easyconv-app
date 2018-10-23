@@ -4,8 +4,8 @@
   "private": true,
   "dependencies": {
     "electron-store": "^2.0.0",
-    "ffmpeg-static": "^2.3.0",
-    "fluent-ffmpeg": "^2.1.2",
+    "ffmpeg-static": "git+https://github.com/eugeneware/ffmpeg-static.git",
+    "fluent-ffmpeg": "git+https://github.com/fluent-ffmpeg/node-fluent-ffmpeg.git",
     "foreman": "^3.0.1",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "electron": "^2.0.10",
-    "ffprobe-static": "^3.0.0",
+    "ffprobe-static": "git+https://github.com/joshwnj/ffprobe-static.git",
     "react-dropzone": "^5.1.0",
     "react-sweet-progress": "^1.1.2"
   }
