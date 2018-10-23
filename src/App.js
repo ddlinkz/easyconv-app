@@ -179,7 +179,7 @@ function InProgress (){
   return (
     <button
       className="inprogress"
-      disabled="true">
+      disabled={true}>
         Conversion in Progress...
     </button>
   )
