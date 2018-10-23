@@ -14,7 +14,7 @@ const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegpath.path);
 ffmpeg.setFfprobePath(ffprobepath.path);
 
-const debug = true;
+const debug = 'false';
 
 if(debug) {
   fs.access(ffmpegpath.path, fs.constants.F_OK, (err) => {
@@ -551,12 +551,15 @@ class MusicList extends Component {
 
     const option = this.state.selectedOption
     const createOnConv = this.state.createOnConv
+
     let output = ''
+    
     if(option === '1'){
       output = this.state.defaultDir
+
       if(!fs.existsSync(output) && createOnConv){
         this.createFolders(output)
-      } else {
+      } else if (!fs.existsSync(output)){
         alert("Directory selected does not exist!")
         this.stopConversion()
         return
@@ -565,11 +568,12 @@ class MusicList extends Component {
       output = this.state.musicDir + '/' +
                this.state.artistForm + '/' +
                this.state.albumForm
+
       if(!fs.existsSync(output) && createOnConv){
         this.createFolders(this.state.musicDir + '/' +
                            this.state.artistForm)
         this.createFolders(output)
-      } else {
+      } else if (!fs.existsSync(output)){
         alert("Directory selected does not exist!")
         this.stopConversion()
         return
