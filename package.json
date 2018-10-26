@@ -2,6 +2,8 @@
   "name": "easyconv-app",
   "version": "0.1.0",
   "private": true,
+  "author": "Austin Brown",
+  "description": "Electrion + React based Conversion App",
   "dependencies": {
     "electron-store": "^2.0.0",
     "ffmpeg-static": "git+https://github.com/eugeneware/ffmpeg-static.git",
@@ -13,7 +15,7 @@
     "react-scripts": "1.1.5"
   },
   "homepage": "./",
-  "main": "src/electron-starter.js",
+  "main": "public/electron.js",
   "scripts": {
     "start": "nf start",
     "build": "react-scripts build",
@@ -21,11 +23,30 @@
     "eject": "react-scripts eject",
     "electron": "electron . ",
     "electron-start": "node src/electron-wait-react",
-    "react-start": "BROWSER=none react-scripts start"
+    "react-start": "BROWSER=none react-scripts start",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "electron-pack": "electron-builder -c.extraMetadata.main = build/electron.js",
+    "preelectron-pack": "yarn build"
   },
   "devDependencies": {
     "electron": "^2.0.10",
+    "electron-builder": "^20.28.4",
     "react-dropzone": "^5.1.0",
     "react-sweet-progress": "^1.1.2"
+  },
+  "build": {
+    "appId": "com.electron.easyconv-app",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "mac": {
+      "category": "conversion.app"
+    }
   }
 }
