@@ -37,6 +37,7 @@
   },
   "build": {
     "appId": "com.electron.easyconv-app",
+    "productName": "EasyConv",
     "files": [
       "build/**/*",
       "node_modules/**/*"
@@ -47,6 +48,16 @@
     },
     "mac": {
       "category": "conversion.app"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "win": {
+      "target": "NSIS",
+      "icon": "build/icon.ico"
     }
   }
 }

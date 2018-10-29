@@ -12,31 +12,6 @@ const ipcRenderer = electron.ipcRenderer;
 
 const ffmpeg = require('fluent-ffmpeg');
 
-let testdir = "Contents/Resources/app.asar.unpacked/"
-
-//ffmpeg.setFfmpegPath(testdir + ffmpegpath.path);
-//ffmpeg.setFfprobePath(testdir + ffprobepath.path);
-
-// Contents/Resources/app.asar.unpacked/node_modules
-
-/*if(true) {
-  //console.log(__dirname)
-  //console.log(testdir + ffmpegpath.path)
-
-  fs.access(testdir + ffmpegpath.path, fs.constants.F_OK, (err) => {
-    console.log(`${ffmpegpath.path} ${err ? 'does not exist' : 'exists'}`);
-  });
-
-  fs.access(testdir + ffprobepath.path, fs.constants.F_OK, (err) => {
-    console.log(`${ffprobepath.path} ${err ? 'does not exist' : 'exists'}`);
-  });
-  
-  /*ffmpeg.getAvailableCodecs(function(err, codecs) {
-    console.log('Available codecs:');
-    console.dir(codecs);
-  });
-}*/
-
 // TODO: //
 //////////////////////////////
 //
@@ -319,20 +294,20 @@ class MusicList extends Component {
   // ======================
 
   componentDidMount() {
+    // Load app directory from electron
     ipcRenderer.once('app-dir-launch-resp', (event, arg) => {
-      console.log(arg)
-      ffmpeg.setFfmpegPath(arg + '.unpacked/' + ffmpegpath.path)
-      ffmpeg.setFfprobePath(arg + '.unpacked/' + ffprobepath.path)
+      ffmpeg.setFfmpegPath(path.join(arg + '.unpacked', ffmpegpath.path))
+      ffmpeg.setFfprobePath(path.join(arg + '.unpacked', ffprobepath.path))
       ffmpeg.getAvailableCodecs(function(err, codecs) {
         console.log('Available codecs:');
         console.dir(codecs);
       })
 
-      fs.access(arg + '.unpacked/' + ffmpegpath.path, fs.constants.F_OK, (err) => {
+      fs.access(path.join(arg + '.unpacked', ffmpegpath.path), fs.constants.F_OK, (err) => {
         console.log(`${ffmpegpath.path} ${err ? 'does not exist' : 'exists'}`);
       });
     
-      fs.access(arg + '.unpacked/' + ffmpegpath.path, fs.constants.F_OK, (err) => {
+      fs.access(path.join(arg + '.unpacked', ffprobepath.path), fs.constants.F_OK, (err) => {
         console.log(`${ffprobepath.path} ${err ? 'does not exist' : 'exists'}`);
       });
 
