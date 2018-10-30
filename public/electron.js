@@ -3,7 +3,6 @@ const Store = require('electron-store')
 const path = require('path')
 const url = require('url')
 const {ipcMain} = require('electron')
-const env = require('./../src/env.js')
 
 // Module to control application life.
 const app = electron.app
@@ -11,6 +10,13 @@ const app = electron.app
 const BrowserWindow = electron.BrowserWindow
 
 const store = new Store();
+
+ipcMain.on('dev-tools', (event, arg) => {
+  console.log(arg + ' envionment')
+  if(arg !== 'production'){
+    mainWindow.webContents.openDevTools()
+  }
+})
 
 ipcMain.on('app-dir-launch', (event, arg) => {
   console.log('App Directory launched')
@@ -84,9 +90,9 @@ function createWindow () {
   mainWindow.loadURL(startUrl)
 
   // Open the DevTools.
-  if(env.getEnv() !== 'production'){
+  /*if(process.env.NODE_ENV !== 'production'){
     mainWindow.webContents.openDevTools()
-  }
+  }*/
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {

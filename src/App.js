@@ -301,6 +301,9 @@ class MusicList extends Component {
   // ======================
 
   componentDidMount() {
+    // DevTools
+    ipcRenderer.send('dev-tools', env.getEnv())
+
     // Load app directory from electron
     ipcRenderer.once('app-dir-launch-resp', (event, arg) => {
       console.log(path.join(arg + '.unpacked', ffmpegpath.path))
