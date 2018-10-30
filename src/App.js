@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import Dropzone from 'react-dropzone'; //https://react-dropzone.netlify.com/
+import path from 'path';
 import ffmpegpath from 'ffmpeg-static';
 import ffprobepath from 'ffprobe-static';
 import { Progress } from 'react-sweet-progress';
@@ -9,16 +10,16 @@ import "react-sweet-progress/lib/style.css";
 const electron = window.require('electron');
 const fs = electron.remote.require('fs');
 const ipcRenderer = electron.ipcRenderer;
+const env = require('./env.js');
 
 const ffmpeg = require('fluent-ffmpeg');
 
 // TODO: //
 //////////////////////////////
 //
-// Need to find node_modules directory in build
+// Set up dev mode and production mode for pathing
 // Set up electron-builder for other platforms 
 // Fixing pathing for packaging app for all OS
-// Add icons
 //
 //////////////////////////////
 
@@ -296,20 +297,28 @@ class MusicList extends Component {
   componentDidMount() {
     // Load app directory from electron
     ipcRenderer.once('app-dir-launch-resp', (event, arg) => {
-      ffmpeg.setFfmpegPath(path.join(arg + '.unpacked', ffmpegpath.path))
-      ffmpeg.setFfprobePath(path.join(arg + '.unpacked', ffprobepath.path))
+      console.log(path.join(arg + '.unpacked', ffmpegpath.path))
+      console.log(env.getEnv())
+      let path_env = ''
+      if(env.getEnv() == 'production'){
+        path_env = arg + '.unpacked'
+      }
+
+      ffmpeg.setFfmpegPath(path.join(path_env, ffmpegpath.path))
+      ffmpeg.setFfprobePath(path.join(path_env, ffprobepath.path))
+
+      fs.access(path.join(path_env, ffmpegpath.path), fs.constants.F_OK, (err) => {
+        console.log(`${ffmpegpath.path} ${err ? 'does not exist' : 'exists'}`);
+      });
+    
+      fs.access(path.join(path_env, ffprobepath.path), fs.constants.F_OK, (err) => {
+        console.log(`${ffprobepath.path} ${err ? 'does not exist' : 'exists'}`);
+      });
+
       ffmpeg.getAvailableCodecs(function(err, codecs) {
         console.log('Available codecs:');
         console.dir(codecs);
       })
-
-      fs.access(path.join(arg + '.unpacked', ffmpegpath.path), fs.constants.F_OK, (err) => {
-        console.log(`${ffmpegpath.path} ${err ? 'does not exist' : 'exists'}`);
-      });
-    
-      fs.access(path.join(arg + '.unpacked', ffprobepath.path), fs.constants.F_OK, (err) => {
-        console.log(`${ffprobepath.path} ${err ? 'does not exist' : 'exists'}`);
-      });
 
     })
     ipcRenderer.send('app-dir-launch', 'app dir msg sent')

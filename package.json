@@ -10,6 +10,7 @@
     "ffprobe-static": "git+https://github.com/joshwnj/ffprobe-static.git",
     "fluent-ffmpeg": "git+https://github.com/fluent-ffmpeg/node-fluent-ffmpeg.git",
     "foreman": "^3.0.1",
+    "path": "^0.12.7",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
     "react-scripts": "1.1.5"
@@ -23,7 +24,7 @@
     "eject": "react-scripts eject",
     "electron": "electron . ",
     "electron-start": "node src/electron-wait-react",
-    "react-start": "BROWSER=none react-scripts start",
+    "react-start": "BROWSER=none NODE_ENV=development react-scripts start",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "electron-pack": "electron-builder -c.extraMetadata.main = build/electron.js",
