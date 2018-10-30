@@ -17,9 +17,9 @@ const ffmpeg = require('fluent-ffmpeg');
 // TODO: //
 //////////////////////////////
 //
-// Set up dev mode and production mode for pathing
 // Set up electron-builder for other platforms 
 // Fixing pathing for packaging app for all OS
+// Fix Choose Directory button
 //
 //////////////////////////////
 
@@ -300,7 +300,7 @@ class MusicList extends Component {
       console.log(path.join(arg + '.unpacked', ffmpegpath.path))
       console.log(env.getEnv())
       let path_env = ''
-      if(env.getEnv() == 'production'){
+      if(env.getEnv() === 'production'){
         path_env = arg + '.unpacked'
       }
 
@@ -578,13 +578,13 @@ class MusicList extends Component {
         return
       }
     } else {
-      output = this.state.musicDir + '/' +
-               this.state.artistForm + '/' +
-               this.state.albumForm
+      output = path.join(this.state.musicDir,
+                         this.state.artistForm,
+                         this.state.albumForm)
 
       if(!fs.existsSync(output) && createOnConv){
-        this.createFolders(this.state.musicDir + '/' +
-                           this.state.artistForm)
+        this.createFolders(path.join(this.state.musicDir,
+                                     this.state.artistForm))
         this.createFolders(output)
       } else if (!fs.existsSync(output)){
         alert("Directory selected does not exist!")
@@ -623,7 +623,9 @@ class MusicList extends Component {
           //console.log('This took ' + (times[i+1] - times[0]) + ' milliseconds')
         })
         .save(
-          output + '/' + oldFiles[i].split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
+          // output + music file 
+          // output + '/' + oldFiles[i].split("/").pop().split('.').slice(0, -1).join('.').concat('.mp3')
+          path.join(output, oldFiles[i].split(/(\\|\/)/g).pop().split('.').slice(0, -1).join().concat('.mp3'))
           )
     }
     if(finished.length === oldFiles.length){

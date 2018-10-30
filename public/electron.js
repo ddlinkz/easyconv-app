@@ -3,6 +3,7 @@ const Store = require('electron-store')
 const path = require('path')
 const url = require('url')
 const {ipcMain} = require('electron')
+const env = require('./../src/env.js')
 
 // Module to control application life.
 const app = electron.app
@@ -83,7 +84,9 @@ function createWindow () {
   mainWindow.loadURL(startUrl)
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  if(env.getEnv() !== 'production'){
+    mainWindow.webContents.openDevTools()
+  }
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
