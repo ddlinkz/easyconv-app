@@ -18,8 +18,10 @@ const ffmpeg = require('fluent-ffmpeg');
 //////////////////////////////
 //
 // Set up electron-builder for other platforms 
-// Fixing pathing for packaging app for all OS
 // Fix Choose Directory button
+// Fix Buttons
+// Stylize the app
+// Undefined Path from input File
 //
 //////////////////////////////
 
@@ -187,7 +189,9 @@ function ClearList (props){
 
 const MusicDirInput = React.forwardRef((props, ref) => (
   <input
-    name="music-dir-file-input" 
+    name="music-dir-file-input"
+    id="music-dir-file-input"
+    className="inputfile"
     type="file" 
     ref={ref}
     webkitdirectory="true" 
@@ -197,6 +201,8 @@ const MusicDirInput = React.forwardRef((props, ref) => (
 const DefaultDirInput = React.forwardRef((props, ref) => (
   <input
     name="default-dir-file-input" 
+    id="default-dir-file-input" 
+    className="inputfile"
     type="file" 
     ref={ref}
     webkitdirectory="true" 
@@ -495,12 +501,15 @@ class MusicList extends Component {
                     in a directory of your choice</p>
                 <br/>
                 <h4 className="directory">
-                  Change Directory:
                 </h4>
                 <DefaultDirInput 
                   ref={this.defaultDirInput}
                   onChange={(e) => this.handleChange(e)}
                   />
+                <label 
+                  htmlFor="default-dir-file-input">
+                    Choose a Directory
+                </label>
                 <SelectDefault
                   defaultDirInput={this.defaultDirInput}
                   defaultDir={this.state.defaultDir}
@@ -516,12 +525,15 @@ class MusicList extends Component {
                   files and place them into your music library</p>
                 <br/>
                 <h4 className="directory">
-                  Change Directory:
                 </h4>
                 <MusicDirInput
                   ref={this.musicDirInput}
                   onChange={(e) => this.handleChange(e)}
                   />
+                <label 
+                  htmlFor="music-dir-file-input">
+                    Choose a Directory
+                </label>
                 <SelectMusic 
                   musicDirInput={this.musicDirInput}
                   musicDir={this.state.musicDir}

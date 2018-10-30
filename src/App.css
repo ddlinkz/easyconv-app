@@ -126,6 +126,29 @@ button:focus {
 button  :hover {
 }
 
+.inputfile {
+  width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+  z-index: -1;
+}
+
+.inputfile + label {
+  font-size: 1.25em;
+  font-weight: 700;
+  color: black;
+  cursor: pointer;
+  border-style: thin;
+  border-color: black;
+}
+
+.inputfile:focus + label,
+.inputfile + label:hover {
+  
+}
+
 button {
   border-color: #4CAF50;
   background-color: #FFF;
