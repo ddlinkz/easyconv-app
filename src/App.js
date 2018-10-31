@@ -17,7 +17,6 @@ const ffmpeg = require('fluent-ffmpeg');
 // TODO: //
 //////////////////////////////
 //
-// Set up electron-builder for other platforms 
 // Fix Choose Directory button
 // Fix Buttons
 // Stylize the app
