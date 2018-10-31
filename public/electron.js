@@ -3,6 +3,7 @@ const Store = require('electron-store')
 const path = require('path')
 const url = require('url')
 const {ipcMain} = require('electron')
+const {dialog} = require('electron')
 
 // Module to control application life.
 const app = electron.app

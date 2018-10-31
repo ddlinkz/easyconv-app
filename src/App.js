@@ -7,6 +7,7 @@ import ffprobepath from 'ffprobe-static';
 import { Progress } from 'react-sweet-progress';
 import "react-sweet-progress/lib/style.css";
 
+const {dialog} = window.require('electron').remote;
 const electron = window.require('electron');
 const fs = electron.remote.require('fs');
 const ipcRenderer = electron.ipcRenderer;
@@ -20,7 +21,9 @@ const ffmpeg = require('fluent-ffmpeg');
 // Fix Choose Directory button
 // Fix Buttons
 // Stylize the app
+// Remove ffmpeg stuff from node_modules
 // Undefined Path from input File
+// Filenames on Windows
 //
 //////////////////////////////
 
@@ -587,7 +590,9 @@ class MusicList extends Component {
       if(!fs.existsSync(output) && createOnConv){
         this.createFolders(output)
       } else if (!fs.existsSync(output)){
-        alert("Directory selected does not exist!")
+        console.log(dialog.showMessageBox({type: 'info', 
+                                           buttons: ['OK'], 
+                                           message: 'The directory you entered does not exist!'}))
         this.stopConversion()
         return
       }
