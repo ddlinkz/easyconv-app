@@ -18,12 +18,12 @@ const ffmpeg = require('fluent-ffmpeg');
 // TODO: //
 //////////////////////////////
 //
-// Fix Choose Directory button
-// Fix Buttons
 // Stylize the app
 // Remove ffmpeg stuff from node_modules
-// Undefined Path from input File
 // Filenames on Windows
+// Empty box w/ inside dashes for select
+// Disabled clear list while in progress
+// only accept .flac/.wav
 //
 //////////////////////////////
 
@@ -96,7 +96,7 @@ class SelectDefault extends Component {
         <br/>
         <form>
           <label>
-            <div className="selectmusicitem">
+            <div className="selectdefaultitem">
               Create directory on conversion:
                 <input 
                   type="checkbox"
@@ -104,7 +104,7 @@ class SelectDefault extends Component {
                   checked={this.props.createOnConv}
                   onChange={this.props.onChange} />
             </div>
-            <div className="selectmusicitem">
+            <div className="selectdefaultitem">
               Directory:
                 <input
                   className="submissionfield"
@@ -124,7 +124,7 @@ class RadioSelect extends Component {
   render() {
     return(
       <div className="radioselect">
-        <h2>Directory Selection</h2>
+        <h2>Mode Selection</h2>
         <RadioOption
           name="formselect"
           options={this.props.choices}
@@ -159,9 +159,10 @@ function RadioOption ({options, selected, onChange}){
 
 function StartConversion (props){
   return(
-    <button 
+    <button
+      className="start"
       onClick={props.conversion}>
-        Start Conversion
+        <i>Start</i>
     </button>
   )
 }
@@ -171,7 +172,7 @@ function InProgress (){
     <button
       className="inprogress"
       disabled={true}>
-        Conversion in Progress...
+        In Progress...
     </button>
   )
 }
@@ -179,8 +180,9 @@ function InProgress (){
 function ClearList (props){
   return (
     <button 
+      className='clearlist'
       onClick={props.clearList}>
-        Clear List
+        <i>Clear List</i>
     </button>
   )
 }
@@ -480,6 +482,31 @@ class MusicList extends Component {
   // Render Component Functions
   // ==========================
 
+  renderFiles() {
+    const check = this.state.files
+    if(check.length == 0 || check === undefined) {
+      return(
+        <div>
+          <h2>Dropped files</h2>
+          <div className="empty-filelist">
+            <p>Drop files here</p>
+          </div>
+        </div>
+      )
+    } else {
+      return(
+        <div>
+          <h2>Dropped files</h2>
+          <ChooseList 
+            active={this.state.conversionActive} 
+            files={this.state.files} 
+            progress={this.state.progress}
+            removeItem={this.removeItem}/>
+        </div>
+      )
+    }
+  }
+
   renderSelect() {
     let choices = [{ text: 'Default', value: '1' },
                    { text: 'Music', value: '2' }]
@@ -500,21 +527,21 @@ class MusicList extends Component {
   // Depending on selectedOption, returns selected Div
   renderSettings() {
     if(this.state.selectedOption === '1'){
-      return (<div className="user-settings">
+      return (<div className="user-settings-default-details">
                 <h3>Default</h3>
                 <p>This option will render your files and place them
-                    in a directory of your choice</p>
+                    into a directory of your choosing</p>
                 <br/>
-                <h4 className="directory">
-                </h4>
-                <DefaultDirInput 
-                  ref={this.defaultDirInput}
-                  onChange={(e) => this.handleChange(e)}
-                  />
-                <label 
-                  htmlFor="default-dir-file-input">
-                    Choose a Directory
-                </label>
+                <div className="directory-button">
+                  <DefaultDirInput 
+                    ref={this.defaultDirInput}
+                    onChange={(e) => this.handleChange(e)}
+                    />
+                  <label 
+                    htmlFor="default-dir-file-input">
+                      Click here to choose an output directory
+                  </label>
+                </div>
                 <SelectDefault
                   defaultDirInput={this.defaultDirInput}
                   defaultDir={this.state.defaultDir}
@@ -524,21 +551,24 @@ class MusicList extends Component {
               </div>
               )
     } else {
-      return (<div className="user-settings">
-                <h3>Choose your music directory</h3>
-                <p>This option will render your
-                  files and place them into your music library</p>
-                <br/>
-                <h4 className="directory">
-                </h4>
-                <MusicDirInput
-                  ref={this.musicDirInput}
-                  onChange={(e) => this.handleChange(e)}
+      return (<div className="user-settings-music-details">
+                <div>
+                  <h3>Music</h3>
+                  <p>This option will render the files and place them 
+                    into your personal music library by Artist then Album
+                    directories</p>
+                  <br/>
+                </div>
+                <div className="directory-button">
+                  <MusicDirInput
+                    ref={this.musicDirInput}
+                    onChange={(e) => this.handleChange(e)}
                   />
-                <label 
-                  htmlFor="music-dir-file-input">
-                    Choose a Directory
-                </label>
+                  <label 
+                    htmlFor="music-dir-file-input">
+                      Click here to choose an output directory
+                  </label>
+                </div>
                 <SelectMusic 
                   musicDirInput={this.musicDirInput}
                   musicDir={this.state.musicDir}
@@ -546,7 +576,7 @@ class MusicList extends Component {
                   albumForm={this.state.albumForm}
                   createOnConv={this.state.createOnConv}
                   onChange={(e) => this.handleChange(e)}
-                  />
+                />
               </div>)
     }
   }
@@ -597,16 +627,18 @@ class MusicList extends Component {
         return
       }
     } else {
-      output = path.join(this.state.musicDir,
-                         this.state.artistForm,
-                         this.state.albumForm)
+      output = this.state.musicDir
 
       if(!fs.existsSync(output) && createOnConv){
         this.createFolders(path.join(this.state.musicDir,
                                      this.state.artistForm))
-        this.createFolders(output)
+        this.createFolders(path.join(this.state.musicDir,
+                                     this.state.artistForm,
+                                     this.state.albumForm))
       } else if (!fs.existsSync(output)){
-        alert("Directory selected does not exist!")
+        console.log(dialog.showMessageBox({type: 'info', 
+                                           buttons: ['OK'], 
+                                           message: 'The music directory you entered does not exist!'}))
         this.stopConversion()
         return
       }
@@ -694,16 +726,9 @@ class MusicList extends Component {
             {this.renderSelect()}
             {this.renderSettings()}
           </div>
-          <div>
-            <h2>Dropped files</h2>
-            <ChooseList 
-              active={this.state.conversionActive} 
-              files={files} 
-              progress={progress}
-              removeItem={this.removeItem}/>
-          </div>
-          {this.renderStart()}
+          {this.renderFiles()}
           <ClearList clearList={() => this.clearList()}/>
+          {this.renderStart()}
         </div>
       </Dropzone>
     );
