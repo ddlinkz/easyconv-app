@@ -21,9 +21,6 @@ const ffmpeg = require('fluent-ffmpeg');
 // Stylize the app
 // Remove ffmpeg stuff from node_modules
 // Filenames on Windows
-// Empty box w/ inside dashes for select
-// Disabled clear list while in progress
-// only accept .flac/.wav
 //
 //////////////////////////////
 
@@ -172,7 +169,7 @@ function InProgress (){
     <button
       className="inprogress"
       disabled={true}>
-        In Progress...
+        <i>In Progress...</i>
     </button>
   )
 }
@@ -181,6 +178,7 @@ function ClearList (props){
   return (
     <button 
       className='clearlist'
+      disabled={props.conversionActive}
       onClick={props.clearList}>
         <i>Clear List</i>
     </button>
@@ -279,7 +277,7 @@ class MusicList extends Component {
   constructor() {
     super()
     this.state = { 
-      accept: '',
+      accept: ['.flac', '.wav', '.aiff', '.m4a'],
       files: [],
       dropzoneActive: false,
       selectedOption: '',
@@ -727,7 +725,8 @@ class MusicList extends Component {
             {this.renderSettings()}
           </div>
           {this.renderFiles()}
-          <ClearList clearList={() => this.clearList()}/>
+          <ClearList clearList={() => this.clearList()}
+                     conversionActive={this.state.conversionActive}/>
           {this.renderStart()}
         </div>
       </Dropzone>

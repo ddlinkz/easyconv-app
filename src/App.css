@@ -77,11 +77,6 @@ div.user-settings {
 
 }
 
-.selectdefault {
-  display: grid;
-  align-items: auto;
-}
-
 .directory {
   text-align: left;
 } 
@@ -221,4 +216,9 @@ button {
 .radioselect {
   padding: 2px;
   margin: -10px;
+}
+
+.inprogress {
+  background-color: rgb(154, 192, 148);
+  color: white;
 }
