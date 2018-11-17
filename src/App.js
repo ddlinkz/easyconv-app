@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import './App.css';
 import Dropzone from 'react-dropzone'; //https://react-dropzone.netlify.com/
 import path from 'path';
-import ffmpegpath from 'ffmpeg-static';
-import ffprobepath from 'ffprobe-static';
+import ffmpegpath from 'ffmpeg-static-electron-react';
+import ffprobepath from 'ffprobe-static-electron-react';
 import { Progress } from 'react-sweet-progress';
 import "react-sweet-progress/lib/style.css";
 
@@ -13,7 +13,7 @@ const fs = electron.remote.require('fs');
 const ipcRenderer = electron.ipcRenderer;
 const env = require('./env.js');
 
-const ffmpeg = require('fluent-ffmpeg');
+const ffmpeg = require('fluent-ffmpeg-electron-react');
 
 // TODO: //
 //////////////////////////////
@@ -21,6 +21,8 @@ const ffmpeg = require('fluent-ffmpeg');
 // Stylize the app
 // Remove ffmpeg stuff from node_modules
 // Filenames on Windows
+// modify .gitignore
+// 
 //
 //////////////////////////////
 
@@ -309,8 +311,10 @@ class MusicList extends Component {
     // Load app directory from electron
     ipcRenderer.once('app-dir-launch-resp', (event, arg) => {
       console.log(path.join(arg + '.unpacked', ffmpegpath.path))
+      console.log(arg)
       console.log(env.getEnv())
       let path_env = ''
+
       if(env.getEnv() === 'production'){
         path_env = arg + '.unpacked'
       }
@@ -330,7 +334,6 @@ class MusicList extends Component {
         console.log('Available codecs:');
         console.dir(codecs);
       })
-
     })
     ipcRenderer.send('app-dir-launch', 'app dir msg sent')
 

@@ -14,7 +14,7 @@ const store = new Store();
 
 ipcMain.on('dev-tools', (event, arg) => {
   console.log(arg + ' envionment')
-  if(arg !== 'production'){
+  if(arg != 'production'){
     mainWindow.webContents.openDevTools()
   }
 })
@@ -80,7 +80,8 @@ function createWindow () {
                                   width: 800, 
                                   height: 600,
                                   'minHeight': 540,
-                                  'minWidth': 600})
+                                  'minWidth': 600
+                                  })
 
   // Create the browser window.
   const startUrl = process.env.ELECTRON_START_URL || url.format({
