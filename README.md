@@ -7,6 +7,22 @@ Drag and drop flac-to-mp3 conversion app built using Electron and React.
 
 In the project directory, run
 
+`npm install`
+
+then head over to node_modules/ffmpeg-static-electron-react.
+
+Create a directory called build, then copy this index.sh script.
+Grant permission to use the script, then in the previous directory, run
+the build script.
+
+`cd node_modules/ffmpeg-static-electron-react`
+`mkdir build`
+`vim index.sh`
+`cd ..`
+`npm run-script build`
+
+to install the ffmpeg binaries.
+
 `npm start`
 
 There are two modes for conversion. 
