@@ -7,7 +7,7 @@
   "dependencies": {
     "concurrently": "^4.0.1",
     "electron-store": "^2.0.0",
-    "ffmpeg-static-electron-react": "^1.0.3",
+    "ffmpeg-static-electron-react": "^1.0.4",
     "ffprobe-static-electron-react": "^1.0.1",
     "fluent-ffmpeg-electron-react": "^1.0.0",
     "path": "^0.12.7",
